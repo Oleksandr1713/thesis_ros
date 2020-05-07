@@ -14,12 +14,22 @@
   <xacro:include filename="$(find rosbot_description)/urdf/macros.xacro" />
 
 
+  <link name="base_footprint">
+    <pose>0 0 0 0 0 0</pose>
+  </link>
+
+  <joint name="base_joint" type="fixed">
+    <origin xyz="0 0 0.04" rpy="0 0 0"/>
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+  </joint>
+
   <link name='base_link'>
-    <pose>0 0 0.1 0 0 0</pose>
+    <pose>0 0 0 0 0 0</pose>
 
     <inertial>
       <mass value="5"/>
-      <origin xyz="0 0 0.04" rpy=" 0 0 0"/>
+      <origin xyz="0 0 0.03" rpy=" 0 0 0"/>
       <inertia 
       ixx="0.01" ixy="0.01" ixz="0" 
       iyy="0.01" iyz="0.01" 
@@ -28,14 +38,14 @@
     </inertial>
 
     <collision name='collision'>
-      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <origin xyz="0 0 0.01" rpy="0 0 0"/>
       <geometry>
         <box size="0.20 0.15 0.04"/>
       </geometry>
     </collision>
 
     <visual name='base_link_visual'>
-      <origin xyz="0 0 -0.02" rpy=" 1.5707 0 1.5707"/>
+      <origin xyz="0 0 -0.03" rpy=" 1.5707 0 1.5707"/>
       <geometry>
         <mesh filename="package://rosbot_description/meshes/box.dae" scale="0.001 0.001 0.001" />
       </geometry>
@@ -45,7 +55,7 @@
 
   <joint name="top_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="top"/>
   </joint>
@@ -274,7 +284,7 @@
   <!-- Orbbec Astra RGBD Camera -->
   <joint name="astra_joint" type="fixed">
     <axis xyz="0 0 0" />
-    <origin xyz="-0.03 0 0.18" rpy="0 0 0"/>
+    <origin xyz="-0.03 0 0.17" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="camera_link"/>
   </joint>
@@ -321,7 +331,7 @@
 
   <joint name="rplidar_joint" type="fixed">
     <axis xyz="0 1 0" />
-    <origin xyz="0.02 0 0" rpy="0 0 3.14"/>
+    <origin xyz="0.02 0 0.07" rpy="0 0 3.14"/>
     <parent link="base_link"/>
     <child link="laser"/>
   </joint>
@@ -329,14 +339,14 @@
   <!-- rplidar Laser -->
   <link name="laser">
     <collision>
-      <origin xyz="0 0 0.058" rpy="1.5707 0 4.71"/>
+      <origin xyz="0 0 -0.023" rpy="1.5707 0 4.71"/>
       <geometry>
         <mesh filename="package://rosbot_description/meshes/rplidar.dae" scale="0.001 0.001 0.001" />
       </geometry>
     </collision>
 
     <visual>
-      <origin xyz="0 0 0.058" rpy="1.5707 0 4.71"/>
+      <origin xyz="0 0 -0.023" rpy="1.5707 0 4.71"/>
       <geometry>
         <mesh filename="package://rosbot_description/meshes/rplidar.dae" scale="0.001 0.001 0.001" />
       </geometry>
@@ -344,7 +354,7 @@
 
     <inertial>
       <mass value="1e-5" />
-      <origin xyz="0 0 0.058" rpy="1.5707 0 4.71"/>
+      <origin xyz="0 0 -0.023" rpy="1.5707 0 4.71"/>
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
     </inertial>
   </link>
