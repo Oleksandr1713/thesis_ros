@@ -1,7 +1,7 @@
 <launch>
 
     <arg name="model" default="$(find rosbot_description)/urdf/rosbot.xacro"/>
-    <arg name="rvizconfig" default="$(find rosbot_description)/rviz/rosbot_model.rviz" />
+    <arg name="rvizconfig" default="$(find simulation)/rviz/rosbot_model.rviz" />
 
     <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 

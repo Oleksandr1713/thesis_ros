@@ -2,7 +2,7 @@
 <launch>
 
     <!-- Map server -->
-    <arg name="map_file" default="$(find rosbot_navigation)/maps/maze.yaml"/>
+    <arg name="map_file" default="$(find simulation)/maps/maze.yaml"/>
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
     <!-- Localization -->
@@ -31,7 +31,22 @@
         <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/>
     </node>
 
+    <!-- Image recognition -->
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
+        <param name="gui" value="false"/>
+        <param name="subscribe_depth" value="true"/>
+        <param name="objects_path" value="$(find simulation)/image_rec/"/>
+
+        <remap from="image" to="/camera/rgb/image_raw"/>
+        <remap from="rgb/image_rect_color" to="/camera/rgb/image_raw"/>
+        <remap from="depth_registered/image_raw" to="/camera/depth/image_raw"/>
+        <remap from="depth_registered/camera_info" to="/camera/depth/camera_info"/>
+    </node>
+
+    <!-- Displays the transform of the recognised sign -->
+    <node if="$(arg recognize)" name="sign_tf_publisher" pkg="simulation" type="sign_tf_node" output="screen"/>
+
     <!-- Show in Rviz   -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosbot_description)/rviz/sim_navigation.rviz" required="true" output='log'/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>
 
 </launch>

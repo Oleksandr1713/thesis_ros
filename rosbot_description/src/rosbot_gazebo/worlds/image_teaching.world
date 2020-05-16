@@ -81,30 +81,30 @@
       <wall_time>1533628715 611770419</wall_time>
       <iterations>7089</iterations>
       <model name='Speed_limit_0_0'>
-        <pose frame=''>0.985406 0.010269 -1.56617 0 -0 1.56794</pose>
+        <pose frame=''>1 -2 -1.56617 0 -0 1.56794</pose>
         <scale>10 10 10</scale>
         <link name='link'>
-          <pose frame=''>0.985406 0.010269 -1.56617 0 -0 1.56794</pose>
+          <pose frame=''>1 -2 -1.56617 0 -0 1.56794</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Stop_Sign_0_0'>
-        <pose frame=''>0.904986 -1.97094 -1.18848 -0.001254 -0.004025 -1.57384</pose>
+        <pose frame=''>1 0 -1.18848 -0.001254 -0.004025 -1.57384</pose>
         <scale>1 1 1</scale>
         <link name='Stop Sign_0::link'>
-          <pose frame=''>0.904986 -1.97094 -1.18848 -0.001254 -0.004025 -1.57384</pose>
+          <pose frame=''>1 0 -1.18848 -0.001254 -0.004025 -1.57384</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='beer_0'>
-        <pose frame=''>0.999653 1.00631 -0.00088 5e-05 -9e-06 -0.002884</pose>
+        <pose frame=''>1 2 -0.00088 5e-05 -1e-05 -0.002884</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>0.999652 1.0063 0.11412 5e-05 -9e-06 -0.002884</pose>
+          <pose frame=''>0.999999 1.99999 0.11412 5e-05 -1e-05 -0.002884</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -136,7 +136,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-1.74662 1.8959 2.11283 0 0.508001 -0.627995</pose>
+        <pose frame=''>-2.35427 0.95938 3.6075 -0 0.776002 -0.231987</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -466,7 +466,7 @@
         <visual name='visual'>
           <geometry>
             <mesh>
-              <scale>1 1 1</scale>
+              <scale>10 10 10</scale>
               <uri>model://speed_limit_sign/meshes/speed_limit_sign.dae</uri>
             </mesh>
           </geometry>
@@ -487,7 +487,7 @@
           <geometry>
             <mesh>
               <uri>/home/lukasz/.gazebo/models/speed_limit_sign/meshes/speed_limit_sign.dae</uri>
-              <scale>1 1 1</scale>
+              <scale>10 10 10</scale>
             </mesh>
           </geometry>
           <surface>

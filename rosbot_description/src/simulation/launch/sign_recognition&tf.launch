@@ -1,0 +1,27 @@
+<launch>
+
+    <arg name="teach" default="true"/>
+    <arg name="recognize" default="false"/>
+
+    <param name="recognize" value="$(arg recognize)" />
+    <param name="teach" value="$(arg teach)" />
+
+    <!-- Image recognition -->
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d" required="true">
+        <param name="gui" value="$(arg teach)"/>
+        <param if="$(arg recognize)" name="subscribe_depth" value="true" type="bool"/>
+        <param if="$(arg recognize)" name="objects_path" value="$(find simulation)/image_rec/"/>
+
+        <remap from="image" to="/camera/rgb/image_raw"/>
+        <remap from="rgb/image_rect_color" to="/camera/rgb/image_raw"/>
+        <remap from="depth_registered/image_raw" to="/camera/depth/image_raw"/>
+        <remap from="depth_registered/camera_info" to="/camera/depth/camera_info"/>
+    </node>
+
+    <!-- Calculates (x,y) center coordinates of the recognised sign on the image from RGB camera-->
+    <node if="$(arg recognize)" name="sign_coordinates_publisher" pkg="simulation" type="sign_coordinates_node" output="screen"/>
+
+    <!-- Displays the transform of the recognised sign -->
+    <node if="$(arg recognize)" name="sign_tf_publisher" pkg="simulation" type="sign_tf_node" output="screen"/>
+
+</launch>

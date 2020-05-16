@@ -6,4 +6,4 @@ sudo killall rviz
 sudo killall roscore
 sudo killall rosmaster
 
-roslaunch simulation simulation_rosbot_world.launch include_signs:=true
+roslaunch simulation gazebo_recognition_world.launch
