@@ -58,6 +58,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/simulation_node.cpp)
 add_executable(sign_coordinates_node scripts/sign_coordinates_on_image.cpp)
 add_executable(sign_tf_node scripts/sign_tf.cpp)
+add_executable(scheduler scripts/scheduler.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -69,6 +70,7 @@ add_executable(sign_tf_node scripts/sign_tf.cpp)
 ## same as for the library above
 add_dependencies(sign_coordinates_node ${sign_coordinates_node_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(sign_tf_node ${sign_tf_node_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(scheduler ${scheduler_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
@@ -76,3 +78,4 @@ add_dependencies(sign_tf_node ${sign_tf_node_EXPORTED_TARGETS} ${catkin_EXPORTED
 # )
 target_link_libraries(sign_coordinates_node ${catkin_LIBRARIES})
 target_link_libraries(sign_tf_node ${catkin_LIBRARIES} Qt5::Core)
+target_link_libraries(scheduler ${catkin_LIBRARIES})
