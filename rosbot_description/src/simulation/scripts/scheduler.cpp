@@ -1,22 +1,45 @@
 #include <ctime>
 #include <iostream>
-#include <ros/ros.h>
 #include <regex>
 #include <fstream>
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
 
 using namespace std;
 
 int writeToLogFile(string data){
     ofstream file;
-    file.open("../../../src/rosbot_description/src/simulation/scripts/log.txt");
-    file << data;
+    file.open("../../../src/rosbot_description/src/simulation/scripts/log.txt", std::ofstream::app);
+    file << data << "\n";
     file.close();
     return 0;
 }
 
+string getDateTimeForAT(long int& seconds){
+    /* This function represents date and time in [[CC]YY]MMDDhhmm[.ss] format,
+     that is used by AT command-line utility */
+
+    char buffer[128];
+
+    int year = localtime(&seconds)->tm_year + 1900;
+    int month = localtime(&seconds)->tm_mon + 1;
+    int day = localtime(&seconds)->tm_mday;
+    int hour = localtime(&seconds)->tm_hour;
+    int min = localtime(&seconds)->tm_min;
+    int sec = localtime(&seconds)->tm_sec;
+
+    sprintf(buffer, "%d%02d%02d%02d%02d.%02d", year, month, day, hour, min, sec);
+    string result(buffer);
+
+    cout << result << "\n";
+    return result;
+}
+
 long int scheduleJob(long int scheduledTime){
     long int job_id = 0;
-    string cmd = "at now +1 minutes";
+    string cmd = "at -t " + getDateTimeForAT(scheduledTime);
+    // line below must point to the script that sends a message to a specific ros topic
     cmd.append(" -f ~/Documents/thesis/rosbot_ws/src/rosbot_description/src/simulation/scripts/sound.sh");
     cmd.append(" 2>&1");
 
@@ -48,6 +71,8 @@ long int scheduleJob(long int scheduledTime){
 void removeJob(long int& job_id){
     string cmd = "atrm " + to_string(job_id);
     system(cmd.c_str());
+
+    writeToLogFile(cmd); // this line is needed only for a debug purpose
 //    cout << cmd;
 }
 
@@ -60,23 +85,22 @@ void secondsToDatetime(long int seconds){
     cout << asctime(localtime(&seconds));
 }
 
+void schedulerCallback(const std_msgs::String::ConstPtr& msg){
+    ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+
+
 int main(int argc, char * argv[]) {
     long int currentTime = getCurrentDatetimeInSeconds();
-//    secondsToDatetime(currentTime);
+////    secondsToDatetime(currentTime);
+//    long int a = scheduleJob(currentTime);
+//    removeJob(a);
+    currentTime+=60;
     long int a = scheduleJob(currentTime);
-    removeJob(a);
+    getDateTimeForAT(currentTime);
 
 //    string a = scheduleJob();
 //    cout << a;
-//    std::time_t t = std::time(nullptr);   // get time now
-//    std::cout << t;
-//    std::tm* now = std::localtime(&t);
-//    std::cout << (now->tm_year + 1900) << '-'
-//              << (now->tm_mon + 1) << '-'
-//              <<  now->tm_mday << ' '
-//              <<  now->tm_hour << ':'
-//              <<  now->tm_min
-//              << "\n";
 
 
 //    //Get the time and store it in the time variable.
@@ -86,6 +110,7 @@ int main(int argc, char * argv[]) {
 
 //    ros::init(argc, argv, "scheduler");
 //    ros::NodeHandle n;
+//    ros::Subscriber sub = n.subscribe("job_scheduler", 1, schedulerCallback);
 //    ros::Time ros_time;
 //    while (ros::ok())
 //    {
