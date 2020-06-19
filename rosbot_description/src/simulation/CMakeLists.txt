@@ -10,10 +10,28 @@ add_compile_options(-std=c++11)
 set(OpenCV_DIR ~/Libraries/opencv-3.4.9/build)
 find_package(catkin REQUIRED COMPONENTS
         roscpp
+        mongodb_store
         std_msgs
+        message_generation
         tf
         OpenCV)
 find_package(Qt5 COMPONENTS Quick Core REQUIRED)
+
+################################################
+## Declare ROS messages, services and actions ##
+################################################
+
+## Generate messages in the 'msg' folder
+ add_message_files(
+   FILES
+   DatabaseEntry.msg
+ )
+
+## Generate added messages and services with any dependencies listed here
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -27,7 +45,7 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES simulation
-  CATKIN_DEPENDS roscpp std_msgs tf qtbase5-dev
+  CATKIN_DEPENDS roscpp message_runtime mongodb_store tf qtbase5-dev
   DEPENDS OpenCV
 )
 
@@ -59,6 +77,7 @@ include_directories(
 add_executable(sign_coordinates_node scripts/sign_coordinates_on_image.cpp)
 add_executable(sign_tf_node scripts/sign_tf.cpp)
 add_executable(scheduler scripts/scheduler.cpp)
+add_executable(database_node scripts/database.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -66,16 +85,17 @@ add_executable(scheduler scripts/scheduler.cpp)
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(sign_coordinates_node ${sign_coordinates_node_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(sign_tf_node ${sign_tf_node_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(scheduler ${scheduler_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+# target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} )
 target_link_libraries(sign_coordinates_node ${catkin_LIBRARIES})
 target_link_libraries(sign_tf_node ${catkin_LIBRARIES} Qt5::Core)
 target_link_libraries(scheduler ${catkin_LIBRARIES})
+target_link_libraries(database_node ${catkin_LIBRARIES})
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+add_dependencies(sign_coordinates_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(sign_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(scheduler ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_dependencies(database_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
