@@ -43,7 +43,7 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES simulation
   CATKIN_DEPENDS roscpp message_runtime mongodb_store tf qtbase5-dev
   DEPENDS OpenCV
@@ -56,7 +56,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+ include
  ${catkin_INCLUDE_DIRS}
 )
 
@@ -77,7 +77,7 @@ include_directories(
 add_executable(sign_coordinates_node scripts/sign_coordinates_on_image.cpp)
 add_executable(sign_tf_node scripts/sign_tf.cpp)
 add_executable(scheduler scripts/scheduler.cpp)
-add_executable(database_node scripts/database.cpp)
+add_executable(database_node scripts/database/database.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
