@@ -10,6 +10,9 @@ using namespace simulation;
 
 namespace mongodb_proxy_decorator {
 
+    const string COLLECTION_NAME = "ros_sign_info";
+
+
     string insertNewEntry(MessageStoreProxy& db_proxy, DatabaseEntry& entry){
         /* Populate database with a new entry and return its ID*/
         string id = db_proxy.insert(entry);

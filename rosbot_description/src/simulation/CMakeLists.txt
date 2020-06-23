@@ -25,6 +25,13 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
  add_message_files(
    FILES
    DatabaseEntry.msg
+   JobBriefInfo.msg
+ )
+
+## Generate services in the 'srv' folder
+ add_service_files(
+   FILES
+   ScheduleJobMsg.srv
  )
 
 ## Generate added messages and services with any dependencies listed here
@@ -76,7 +83,8 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/simulation_node.cpp)
 add_executable(sign_coordinates_node scripts/sign_coordinates_on_image.cpp)
 add_executable(sign_tf_node scripts/sign_tf.cpp)
-add_executable(scheduler scripts/scheduler.cpp)
+add_executable(job_scheduler_node scripts/scheduler/job_scheduler.cpp)
+add_executable(job_catcher_node scripts/catcher/job_catcher.cpp)
 add_executable(database_node scripts/database/database.cpp)
 
 ## Rename C++ executable without prefix
@@ -89,13 +97,14 @@ add_executable(database_node scripts/database/database.cpp)
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} )
 target_link_libraries(sign_coordinates_node ${catkin_LIBRARIES})
 target_link_libraries(sign_tf_node ${catkin_LIBRARIES} Qt5::Core)
-target_link_libraries(scheduler ${catkin_LIBRARIES})
+target_link_libraries(job_scheduler_node ${catkin_LIBRARIES})
+target_link_libraries(job_catcher_node ${catkin_LIBRARIES})
 target_link_libraries(database_node ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(sign_coordinates_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(sign_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(scheduler ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
+add_dependencies(job_scheduler_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(job_catcher_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(database_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
