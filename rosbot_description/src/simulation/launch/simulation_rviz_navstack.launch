@@ -44,7 +44,7 @@
     </node>
 
     <!-- Displays the transform of the recognised sign -->
-    <node if="$(arg recognize)" name="sign_tf_publisher" pkg="simulation" type="sign_tf_node" output="screen"/>
+    <node name="sign_tf_publisher" pkg="simulation" type="sign_tf_node" output="screen"/>
 
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>

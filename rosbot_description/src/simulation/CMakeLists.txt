@@ -13,6 +13,10 @@ find_package(catkin REQUIRED COMPONENTS
         mongodb_store
         std_msgs
         message_generation
+        grid_map_core
+        grid_map_msgs
+        grid_map_ros
+        nav_msgs
         tf
         OpenCV)
 find_package(Qt5 COMPONENTS Quick Core REQUIRED)
@@ -52,7 +56,16 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES simulation
-  CATKIN_DEPENDS roscpp message_runtime mongodb_store tf qtbase5-dev
+  CATKIN_DEPENDS
+        roscpp
+        message_runtime
+        mongodb_store
+        grid_map_core
+        grid_map_msgs
+        grid_map_ros
+        nav_msgs
+        tf
+        qtbase5-dev
   DEPENDS OpenCV
 )
 
@@ -86,6 +99,7 @@ add_executable(sign_tf_node scripts/sign_tf.cpp)
 add_executable(job_scheduler_node scripts/scheduler/job_scheduler.cpp)
 add_executable(job_catcher_node scripts/catcher/job_catcher.cpp)
 add_executable(database_node scripts/database/database.cpp)
+add_executable(map_enrichment_node scripts/enrichment/map_enrichment.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -100,6 +114,7 @@ target_link_libraries(sign_tf_node ${catkin_LIBRARIES} Qt5::Core)
 target_link_libraries(job_scheduler_node ${catkin_LIBRARIES})
 target_link_libraries(job_catcher_node ${catkin_LIBRARIES})
 target_link_libraries(database_node ${catkin_LIBRARIES})
+target_link_libraries(map_enrichment_node ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -108,3 +123,4 @@ add_dependencies(sign_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPOR
 add_dependencies(job_scheduler_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(job_catcher_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(database_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(map_enrichment_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
