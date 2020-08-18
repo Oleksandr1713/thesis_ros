@@ -78,8 +78,11 @@ public:
                 try{
                     // Get transformation from "object_#" frame to target frame
                     // The timestamp matches the one sent over TF
+//                    tfListener_.lookupTransform(targetFrameId_, ros::Time::now(), objectFrameId, ros::Time(0), targetFrameId_,pose);
+//                    tfListener_.lookupTransform(msg->header.frame_id, ros::Time::now(), objectFrameId, ros::Time(0), msg->header.frame_id, poseCam);
+
+                    tfListener_.waitForTransform(targetFrameId_, objectFrameId, msg->header.stamp, ros::Duration(1.0));
                     tfListener_.lookupTransform(targetFrameId_, objectFrameId, msg->header.stamp, pose);
-                    tfListener_.lookupTransform(msg->header.frame_id, objectFrameId, msg->header.stamp, poseCam);
                 }
                 catch(tf::TransformException & ex){
                     ROS_WARN("%s",ex.what());
@@ -91,10 +94,10 @@ public:
                          id, targetFrameId_.c_str(),
                          pose.getOrigin().x(), pose.getOrigin().y(), pose.getOrigin().z(),
                          pose.getRotation().x(), pose.getRotation().y(), pose.getRotation().z(), pose.getRotation().w());
-                ROS_INFO("Object_%d [x,y,z] [x,y,z,w] in \"%s\" frame: [%f,%f,%f] [%f,%f,%f,%f]",
-                         id, msg->header.frame_id.c_str(),
-                         poseCam.getOrigin().x(), poseCam.getOrigin().y(), poseCam.getOrigin().z(),
-                         poseCam.getRotation().x(), poseCam.getRotation().y(), poseCam.getRotation().z(), poseCam.getRotation().w());
+//                ROS_INFO("Object_%d [x,y,z] [x,y,z,w] in \"%s\" frame: [%f,%f,%f] [%f,%f,%f,%f]",
+//                         id, msg->header.frame_id.c_str(),
+//                         poseCam.getOrigin().x(), poseCam.getOrigin().y(), poseCam.getOrigin().z(),
+//                         poseCam.getRotation().x(), poseCam.getRotation().y(), poseCam.getRotation().z(), poseCam.getRotation().w());
 
             }
         }
