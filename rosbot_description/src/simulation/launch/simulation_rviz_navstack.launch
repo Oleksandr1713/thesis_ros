@@ -13,7 +13,9 @@
         <param name="base_frame_id" value="base_footprint"/>
         <param name="update_min_d" value="0.1"/>
         <param name="update_min_a" value="0.2"/>
-        <param name="min_particles" value="500"/>
+        <param name="min_particles" value="100"/>
+        <param name="max_particles" value="300"/>
+        <param name="transform_tolerance" value="0.5"/>
     </node>
 
     <!-- Move base -->
@@ -22,6 +24,7 @@
         <rosparam file="$(find rosbot_navigation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
         <rosparam file="$(find rosbot_navigation)/config/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find rosbot_navigation)/config/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find rosbot_navigation)/config/move_base_params.yaml" command="load" />
         <rosparam file="$(find rosbot_navigation)/config/trajectory_planner.yaml" command="load" />
 
         <remap from="cmd_vel" to="cmd_vel"/>
