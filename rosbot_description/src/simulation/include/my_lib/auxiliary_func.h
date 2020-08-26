@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <fstream>
+#include <math.h>
 
 
 namespace auxiliary_func {
@@ -32,6 +33,11 @@ namespace auxiliary_func {
         std::string cmd = "bash " + SOUND_RELATIVE_ADDRESS;
         system(cmd.c_str());
         return true;
+    }
+
+    double roundToNearest(float value, int precision){
+        int desiredPrecision = (int) pow(10, precision);
+        return (round(value * desiredPrecision)) / desiredPrecision;
     }
 
 }

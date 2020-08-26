@@ -35,6 +35,8 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
+   AddSignOnMapMsg.srv
+   RemoveSignFromMapMsg.srv
    ScheduleJobMsg.srv
  )
 
