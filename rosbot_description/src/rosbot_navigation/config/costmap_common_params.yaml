@@ -6,7 +6,7 @@ footprint: [[0.12, 0.14], [0.12, -0.14], [-0.12, -0.14], [-0.12, 0.14]]
 
 static_map:
   enabled: true
-  map_topic: /map
+  map_topic: /augmented_map # this declaration doesn't work, it must be remapped explicitly in the launch file of move_base
   subscribe_to_updates: true
 
 obstacles_layer:

@@ -5,9 +5,13 @@
     <arg name="map_file" default="$(find simulation)/maps/maze.yaml"/>
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
+    <!-- Map enrichment -->
+    <node name="map_enrichment" pkg="simulation" type="map_enrichment_node" output="screen"/>
+
     <!-- Localization -->
     <node pkg="amcl" type="amcl" name="amcl" output="screen">
         <remap from="scan" to="/scan"/>
+        <remap from="map" to="/map"/>
         <param name="odom_frame_id" value="odom"/>
         <param name="odom_model_type" value="diff-corrected"/>
         <param name="base_frame_id" value="base_footprint"/>
@@ -16,6 +20,7 @@
         <param name="min_particles" value="100"/>
         <param name="max_particles" value="300"/>
         <param name="transform_tolerance" value="0.5"/>
+        <param name="use_map_topic" value="true"/>
     </node>
 
     <!-- Move base -->
@@ -30,8 +35,8 @@
         <remap from="cmd_vel" to="cmd_vel"/>
         <remap from="odom" to="odom"/>
         <remap from="scan" to="/scan"/>
-        <param name="move_base/DWAPlannerROS/yaw_goal_tolerance" value="1.0"/>
-        <param name="move_base/DWAPlannerROS/xy_goal_tolerance" value="1.0"/>
+        <remap from="map" to="/augmented_map"/>
+<!--        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />-->
     </node>
 
     <!-- Image recognition -->

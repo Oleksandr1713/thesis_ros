@@ -3,6 +3,7 @@
 #include <grid_map_core/grid_map_core.hpp>
 #include <grid_map_ros/GridMapRosConverter.hpp>
 #include <nav_msgs/OccupancyGrid.h>
+#include <map_msgs/OccupancyGridUpdate.h>
 #include "nav_msgs/GetMap.h"
 #include "simulation/AddSignOnMapMsg.h"
 #include "simulation/RemoveSignFromMapMsg.h"
@@ -13,10 +14,20 @@ using namespace auxiliary_func;
 grid_map::GridMap *map;
 ros::Publisher pub_map;
 ros::Publisher pub_signs;
+ros::Publisher pub_map_update;
 
+/* Layer names */
 const std::string ORIGIN_LAYER = "origin_map_layer";
 const std::string AUGMENTED_LAYER = "augmented_map_layer";
 
+/* Topic names */
+const std::string PUB_AUGMENTED_MAP = "/augmented_map";                             // topic to publish the updated map via OccupancyGrid message
+//const std::string PUB_AUGMENTED_MAP_UPDATE = PUB_AUGMENTED_MAP + "_updates";        // topic to publish the updated map via OccupancyGridUpdate message
+
+/* Service names */
+const std::string REQ_ORIGINAL_MAP = "/static_map";                         // service name, where the original static map can be requested
+const std::string ADV_ENRICH_AUGMENTED_MAP = "add_sign_on_map";             // name of advertised service that can be requested by other nodes to add a sign on the map
+const std::string ADV_IMPOVERISH_AUGMENTED_MAP = "remove_sign_from_map";    // name of advertised service that can be requested by other nodes to remove a sign from the map
 
 /**
  * Method calculates the dimension of a layer and describes it as two diagonal points of a rectangle.
@@ -190,10 +201,19 @@ bool removeSignFromMap(simulation::RemoveSignFromMapMsg::Request &request, simul
 
     response.success = success;
     if(success){
-        nav_msgs::OccupancyGrid augmentedMapOccupancyGrid;
-        grid_map::GridMapRosConverter::toOccupancyGrid(*map, AUGMENTED_LAYER,0.0, 1.0, augmentedMapOccupancyGrid);
+        nav_msgs::OccupancyGrid augmentedMapOG;
+//        map_msgs::OccupancyGridUpdate augmentedMapOGU;
 
-        pub_map.publish(augmentedMapOccupancyGrid);
+        grid_map::GridMapRosConverter::toOccupancyGrid(*map, AUGMENTED_LAYER,0.0, 1.0, augmentedMapOG);
+        pub_map.publish(augmentedMapOG);
+
+//        augmentedMapOGU.header = augmentedMapOG.header;
+//        augmentedMapOGU.x = augmentedMapOG.info.origin.position.x;
+//        augmentedMapOGU.y = augmentedMapOG.info.origin.position.y;
+//        augmentedMapOGU.width = augmentedMapOG.info.width;
+//        augmentedMapOGU.height = augmentedMapOG.info.height;
+//        augmentedMapOGU.data = augmentedMapOG.data;
+//        pub_map_update.publish(augmentedMapOGU);
     }
     return true;
 }
@@ -202,10 +222,11 @@ bool removeSignFromMap(simulation::RemoveSignFromMapMsg::Request &request, simul
 int main(int argc, char * argv[]) {
     ros::init(argc, argv, "map_enrichment_node");
     ros::NodeHandle nh("~");
-    ros::ServiceClient client_map_server = nh.serviceClient<nav_msgs::GetMap>("/static_map");
-    ros::ServiceServer srv_add_sign = nh.advertiseService("add_sign_on_map", addSignOnMap);
-    ros::ServiceServer srv_remove_sign = nh.advertiseService("remove_sign_from_map", removeSignFromMap);
-    pub_map = nh.advertise<nav_msgs::OccupancyGrid>("/augmented_map", 1, true);
+    ros::ServiceClient client_map_server = nh.serviceClient<nav_msgs::GetMap>(REQ_ORIGINAL_MAP);
+    ros::ServiceServer srv_add_sign = nh.advertiseService(ADV_ENRICH_AUGMENTED_MAP, addSignOnMap);
+    ros::ServiceServer srv_remove_sign = nh.advertiseService(ADV_IMPOVERISH_AUGMENTED_MAP, removeSignFromMap);
+    pub_map = nh.advertise<nav_msgs::OccupancyGrid>(PUB_AUGMENTED_MAP, 1, true);
+//    pub_map_update = nh.advertise<map_msgs::OccupancyGridUpdate>(PUB_AUGMENTED_MAP_UPDATE, 1);
 
     nav_msgs::GetMap srv;
     client_map_server.call(srv);
