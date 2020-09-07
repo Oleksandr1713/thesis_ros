@@ -1,9 +1,9 @@
 #ifndef SRC_OBSTACLE_H
 #define SRC_OBSTACLE_H
 
-static const float X_DEV = 0.1; // a deviation of the x coordinate (+/- in m)
-static const float Y_DEV = 0.1; // a deviation of the y coordinate (+/- in m)
-static const float Z_DEV = 0.1; // a deviation of the z coordinate (+/- in m)
+static const float X_DEV = 0.5; // a deviation of the x coordinate (+/- in m)
+static const float Y_DEV = 0.5; // a deviation of the y coordinate (+/- in m)
+static const float Z_DEV = 0.5; // a deviation of the z coordinate (+/- in m)
 
 class Obstacle{
 

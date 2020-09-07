@@ -32,9 +32,14 @@ int main(int argc, char** argv){
                 std::cin >> obstacle.y;
                 std::cout << "Please enter z value: ";
                 std::cin >> obstacle.z;
-                cache.addElement(obstacle);
-                std::cout << "==========================" << std::endl;
+                if(cache.addElement(obstacle)){
+                    std::cout << "New element has been added" << std::endl;
+                    std::cout << "==========================" << std::endl;
 
+                } else{
+                    std::cout << "Element cannot be added, because it is already in the Cache" << std::endl;
+                    std::cout << "===========================================================" << std::endl;
+                }
                 break;
             }
             case '3': {
@@ -42,8 +47,13 @@ int main(int argc, char** argv){
                 int index;
                 std::cout << "Please enter the index of the element to be removed: ";
                 std::cin >> index;
-                cache.removeElement(index);
-                std::cout << "========================" << std::endl;
+                if(cache.removeElement(index)){
+                    std::cout << "Element has been removed" << std::endl;
+                    std::cout << "========================" << std::endl;
+                } else{
+                    std::cout << "Error! Index outside of the Cache size" << std::endl;
+                    std::cout << "======================================" << std::endl;
+                }
                 break;
             }
             case '4': {
