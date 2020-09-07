@@ -103,6 +103,8 @@ add_executable(job_catcher_node scripts/catcher/job_catcher.cpp)
 add_executable(database_node scripts/database/database.cpp)
 add_executable(map_enrichment_node scripts/enrichment/map_enrichment.cpp)
 
+add_executable(cache scripts/cache.cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
