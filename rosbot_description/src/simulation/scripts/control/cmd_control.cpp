@@ -51,11 +51,11 @@ public:
             ROS_INFO("Status of the old goal: %s", mbc->getCurrentActionLibGoalState().toString().c_str());
         } else {
             mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
-            geometry_msgs::Point goal;
-            goal.x = msg.get()->x;
-            goal.y = msg.get()->y;
-            goal.z = msg.get()->z;
-            mbc->goTo(&goal);
+            boost::shared_ptr<geometry_msgs::Point> goal = boost::shared_ptr<geometry_msgs::Point>(new geometry_msgs::Point);
+            goal->x = msg.get()->x;
+            goal->y = msg.get()->y;
+            goal->z = msg.get()->z;
+            mbc->goTo(goal);
         }
     }
 
@@ -91,16 +91,17 @@ public:
     void replanPathCallback(std_msgs::Empty msg){
         if(mbc != nullptr && mbc->getCurrentSelfGoalState() == MoveBaseClient::PAUSED){
             ROS_INFO("Path replanning has been started...");
-            geometry_msgs::Point* pSource = mbc->getPSource();
-            geometry_msgs::Point* pDestination = mbc->getPDestination();
+            boost::shared_ptr<geometry_msgs::Point> source = mbc->getPSource();
+            boost::shared_ptr<geometry_msgs::Point> destination = mbc->getPDestination();
 
             resetUniquePtrCallback(std_msgs::Empty());
             mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
-            mbc->setPSource(pSource);
-            mbc->goTo(pDestination);
+            mbc->setPSource(source);
+            mbc->goTo(destination);
         } else {
             ROS_INFO("Nothing to replan!");
-        }}
+        }
+    }
 };
 
 int main(int argc, char** argv){
