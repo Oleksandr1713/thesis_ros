@@ -27,6 +27,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tf/transform_listener.h>
 #include <find_object_2d/ObjectsStamped.h>
 #include <QtCore/QString>
+#include "cache/cache.h"
+#include "cache/obstacle.h"
 
 class SignTransform{
 
@@ -35,6 +37,7 @@ private:
     std::string objFramePrefix_;
     ros::Subscriber subs_;
     tf::TransformListener tfListener_;
+    Cache cache;
 
 public:
     SignTransform(): targetFrameId_("/map"), objFramePrefix_("object"){
@@ -89,7 +92,15 @@ public:
                     continue;
                 }
 
+                Obstacle obstacle(pose.getOrigin().x(), pose.getOrigin().y(), pose.getOrigin().z());
+                if(cache.addElement(obstacle)){
+                    ROS_INFO("New element has been added to the Cache");
+                } else{
+                    ROS_INFO("Element cannot be added, because it is already in the Cache");
+                }
                 // Here "pose" is the position of the object "id" in target frame.
+                double yaw = tf::getYaw(pose.getRotation());
+                ROS_INFO("%f", yaw);
                 ROS_INFO("Object_%d [x,y,z] [x,y,z,w] in \"%s\" frame: [%f,%f,%f] [%f,%f,%f,%f]",
                          id, targetFrameId_.c_str(),
                          pose.getOrigin().x(), pose.getOrigin().y(), pose.getOrigin().z(),
