@@ -17,6 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
         grid_map_msgs
         grid_map_ros
         nav_msgs
+        move_base_msgs
+        actionlib
         tf
         OpenCV)
 find_package(Qt5 COMPONENTS Quick Core REQUIRED)
@@ -66,6 +68,8 @@ catkin_package(
         grid_map_msgs
         grid_map_ros
         nav_msgs
+        move_base_msgs
+        actionlib
         tf
         qtbase5-dev
   DEPENDS OpenCV
@@ -102,6 +106,7 @@ add_executable(job_scheduler_node scripts/scheduler/job_scheduler.cpp)
 add_executable(job_catcher_node scripts/catcher/job_catcher.cpp)
 add_executable(database_node scripts/database/database.cpp)
 add_executable(map_enrichment_node scripts/enrichment/map_enrichment.cpp)
+add_executable(cmd_control_node scripts/control/cmd_control.cpp)
 
 add_executable(cache scripts/cache.cpp)
 
@@ -119,6 +124,7 @@ target_link_libraries(job_scheduler_node ${catkin_LIBRARIES})
 target_link_libraries(job_catcher_node ${catkin_LIBRARIES})
 target_link_libraries(database_node ${catkin_LIBRARIES})
 target_link_libraries(map_enrichment_node ${catkin_LIBRARIES})
+target_link_libraries(cmd_control_node ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -128,3 +134,4 @@ add_dependencies(job_scheduler_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin
 add_dependencies(job_catcher_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(database_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(map_enrichment_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(cmd_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
