@@ -21,14 +21,12 @@ private:
     ActionClient ac;
     State goalState;
     ros::Publisher pub_garbage_collector;
-    geometry_msgs::Point* pSource;
-    geometry_msgs::Point* pDestination;
+    boost::shared_ptr<geometry_msgs::Point> pSource;
+    boost::shared_ptr<geometry_msgs::Point> pDestination;
 
 public:
     explicit MoveBaseClient(ros::Publisher& pub_garbage_collector): ac("move_base", true),
-                                                                    goalState(UNASSIGNED),
-                                                                    pSource(nullptr),
-                                                                    pDestination(nullptr){
+                                                                    goalState(UNASSIGNED){
         this->pub_garbage_collector = pub_garbage_collector;
         ROS_INFO("Waiting for the move_base action server to come up");
         ac.waitForServer();
@@ -39,28 +37,28 @@ public:
         ROS_INFO("Client object destroyed");
     }
 
-    geometry_msgs::Point *getPSource() const {
+    const boost::shared_ptr<geometry_msgs::Point> &getPSource() const {
         return pSource;
     }
 
-    void setPSource(geometry_msgs::Point *pSource) {
+    void setPSource(const boost::shared_ptr<geometry_msgs::Point> &pSource) {
         MoveBaseClient::pSource = pSource;
     }
 
-    geometry_msgs::Point *getPDestination() const {
+    const boost::shared_ptr<geometry_msgs::Point> &getPDestination() const {
         return pDestination;
     }
 
-    void setPDestination(geometry_msgs::Point *pDestination) {
+    void setPDestination(const boost::shared_ptr<geometry_msgs::Point> &pDestination) {
         MoveBaseClient::pDestination = pDestination;
     }
 
-    void goTo(geometry_msgs::Point* pMsg){
-        this->pDestination = pMsg;
+    void goTo(boost::shared_ptr<geometry_msgs::Point>& refPtrMsg){
+        setPDestination(refPtrMsg);
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.header.frame_id = "map";
         goal.target_pose.header.stamp = ros::Time::now();
-        goal.target_pose.pose.position = *pMsg;
+        goal.target_pose.pose.position = *refPtrMsg;
         goal.target_pose.pose.orientation.w = 1.0;
         ROS_INFO("Sending goal");
         ac.sendGoal(goal,
@@ -78,8 +76,9 @@ public:
     // Called every time feedback is received for the goal
     void feedbackCallback(const move_base_msgs::MoveBaseFeedbackConstPtr& feedback){
         if(pSource == nullptr){
-            geometry_msgs::Point source = feedback.get()->base_position.pose.position;
-            pSource = &source;
+            pSource = boost::shared_ptr<geometry_msgs::Point>(new geometry_msgs::Point);
+            pSource->x = feedback.get()->base_position.pose.position.x;
+            pSource->y = feedback.get()->base_position.pose.position.y;
         }
         ROS_INFO("Feedback msg received at pose (%.2f, %.2f)", feedback->base_position.pose.position.x, feedback->base_position.pose.position.y);
     }
