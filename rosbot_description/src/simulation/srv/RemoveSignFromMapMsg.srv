@@ -1,4 +1,6 @@
 int64 sign_id
+float64 x_center
+float64 y_center
 float64 x1_intersection
 float64 y1_intersection
 float64 x2_intersection

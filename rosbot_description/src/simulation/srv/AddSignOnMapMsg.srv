@@ -1,8 +1,7 @@
 int64 sign_id
-float64 x1_coordinate
-float64 y1_coordinate
-float64 x2_coordinate
-float64 y2_coordinate
+float64 x_center
+float64 y_center
+float64 dir_radians
 ---
 bool success
 float64 x1_intersection
