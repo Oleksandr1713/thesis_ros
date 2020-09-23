@@ -2,9 +2,13 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <std_msgs/Empty.h>
 #include "control/move_base_client.h"
+#include "my_lib/auxiliary_func.h"
+#include "constants/Constants.h"
+
+using namespace auxiliary_func;
 
 /* ROS node name*/
-const std::string NODE_NAME = "cmd_control_node";
+constexpr static const char* NODE_NAME = "cmd_control_node";
 
 class CommandLineControl{
 
@@ -19,26 +23,17 @@ public:
     ros::Subscriber sub_resume_goal;
     ros::Subscriber sub_replan_path;
 
-private:
-    /* Topic names */
-    const std::string TOPIC_GO_TO = "go_to";               // communication channel to request a navigation to a destination goal
-    const std::string TOPIC_CANCEL_GOAL = "cancel_goal";   // communication channel to cancel a currently running navigation goal
-    const std::string TOPIC_PAUSE_GOAL = "pause_goal";     // communication channel to pause a currently running navigation goal
-    const std::string TOPIC_RESUME_GOAL = "resume_goal";   // communication channel to resume a currently running navigation goal
-    const std::string TOPIC_REPLAN_PATH = "replan_path";   // communication channel to find a new path to the already assigned destination goal
-    const std::string TOPIC_GARBAGE_COLLECTOR = "garbage_collector";  // communication channel to trigger a smart-pointer reset
-
 public:
     explicit CommandLineControl(ros::NodeHandle& nh) {
-        pub_garbage_collector = nh.advertise<std_msgs::Empty>(TOPIC_GARBAGE_COLLECTOR, 1, false);
-        sub_garbage_collector = nh.subscribe(TOPIC_GARBAGE_COLLECTOR, 1, &CommandLineControl::resetUniquePtrCallback, this);
+        pub_garbage_collector = nh.advertise<std_msgs::Empty>(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
+        sub_garbage_collector = nh.subscribe(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
 
-        sub_go_to = nh.subscribe(TOPIC_GO_TO, 1, &CommandLineControl::goToCallback, this);
-        sub_cancel_goal = nh.subscribe(TOPIC_CANCEL_GOAL, 1, &CommandLineControl::cancelGoalCallback, this);
-        sub_pause_goal = nh.subscribe(TOPIC_PAUSE_GOAL, 1, &CommandLineControl::pauseGoalCallback, this);
-        sub_resume_goal = nh.subscribe(TOPIC_RESUME_GOAL, 1, &CommandLineControl::resumeGoalCallback, this);
+        sub_go_to = nh.subscribe(str(constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
+        sub_cancel_goal = nh.subscribe(str(constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
+        sub_pause_goal = nh.subscribe(str(constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
+        sub_resume_goal = nh.subscribe(str(constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
 
-        sub_replan_path = nh.subscribe(TOPIC_REPLAN_PATH, 1, &CommandLineControl::replanPathCallback, this);
+        sub_replan_path = nh.subscribe(str(constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
     }
 
     void resetUniquePtrCallback(std_msgs::Empty msg) {
@@ -105,7 +100,7 @@ public:
 };
 
 int main(int argc, char** argv){
-    ros::init(argc, argv, NODE_NAME);
+    ros::init(argc, argv, str(NODE_NAME));
     ros::NodeHandle nh("~");
     CommandLineControl cmd_control(nh);
     ros::spin();
