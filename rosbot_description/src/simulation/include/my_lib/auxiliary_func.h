@@ -40,6 +40,10 @@ namespace auxiliary_func {
         return (round(value * desiredPrecision)) / desiredPrecision;
     }
 
+    std::string str(const char array[]){
+        return std::string(array);
+    }
+
 }
 
 #endif //SRC_AUXILIARY_FUNC_H
