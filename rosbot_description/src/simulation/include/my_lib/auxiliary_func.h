@@ -4,6 +4,7 @@
 #include <ctime>
 #include <fstream>
 #include <math.h>
+#include <ros/console.h>
 
 
 namespace auxiliary_func {
@@ -42,6 +43,13 @@ namespace auxiliary_func {
 
     std::string str(const char array[]){
         return std::string(array);
+    }
+
+    /* Method allows to change a Logger level of a single node */
+    void changeNodeLoggerLevel(ros::console::levels::Level level){
+        if(ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, level)) {
+            ros::console::notifyLoggerLevelsChanged();
+        }
     }
 
 }

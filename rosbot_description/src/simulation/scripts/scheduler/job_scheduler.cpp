@@ -6,6 +6,7 @@
 #include "std_msgs/String.h"
 #include "mongodb_store/message_store.h"
 #include "database/db_proxy_decorator.h"
+#include "constants/Constants.h"
 #include "my_lib/auxiliary_func.h"
 #include "simulation/ScheduleJobMsg.h"
 #include "simulation/JobBriefInfo.h"
@@ -32,8 +33,8 @@ public:
         dbEntry.sign_id = request.sign_id;
         dbEntry.time_start = request.time_start;    // time in seconds since Unix epoch
         dbEntry.time_end = calculateUpperTimeOfSignValidity(request.sign_id, request.time_start);  // time in seconds since Unix epoch
-        dbEntry.x_coordinate = request.x_coordinate;
-        dbEntry.y_coordinate = request.y_coordinate;
+//        dbEntry.x_coordinate = request.x_coordinate;
+//        dbEntry.y_coordinate = request.y_coordinate;
 
         string entry_id = insertNewEntry(messageStore, dbEntry);
         response.entry_id = entry_id;
@@ -195,7 +196,7 @@ int main(int argc, char * argv[]) {
     ros::init(argc, argv, "job_scheduler_node");
     ros::NodeHandle nh("~");
 
-    JobScheduler scheduler(nh, COLLECTION_NAME);
+    JobScheduler scheduler(nh, str(constants::COLLECTION_NAME));
     ros::ServiceServer service = nh.advertiseService("scheduler_service", &JobScheduler::callback, &scheduler);
 
     ROS_INFO("Scheduler service is up.");

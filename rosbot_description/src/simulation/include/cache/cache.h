@@ -51,7 +51,11 @@ public:
         } else {
             return false;
         }
+    }
 
+    bool removeElement(Obstacle& obstacle){
+        int index = findElement(obstacle);
+        return removeElement(index);
     }
 
     void display(){

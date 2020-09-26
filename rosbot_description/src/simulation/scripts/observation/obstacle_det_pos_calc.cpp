@@ -29,24 +29,45 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QString>
 #include "cache/cache.h"
 #include "cache/obstacle.h"
+#include "simulation/AddSignOnMapMsg.h"
+#include "simulation/RemoveSignFromMapMsg.h"
+#include "my_lib/auxiliary_func.h"
+#include "constants/Constants.h"
 
-class SignTransform{
+using namespace auxiliary_func;
+
+/* ROS node name*/
+constexpr static const char* NODE_NAME = "obstacle_det_pos_calc_node";
+
+class ObstacleDetectionAndPositionCalculation{
 
 private:
     std::string targetFrameId_;
     std::string objFramePrefix_;
     ros::Subscriber subs_;
+    ros::Publisher pub_pause_agv;
+    ros::Publisher pub_resume_agv;
+    ros::Publisher pub_replan_agv;
+    ros::ServiceClient client_add_sign;
+    ros::ServiceClient client_remove_sign;
     tf::TransformListener tfListener_;
     Cache cache;
 
 public:
-    SignTransform(): targetFrameId_("/map"), objFramePrefix_("object"){
-        ros::NodeHandle pnh("~");
-        pnh.param("target_frame_id", targetFrameId_, targetFrameId_);
-        pnh.param("object_prefix", objFramePrefix_, objFramePrefix_);
+    ObstacleDetectionAndPositionCalculation(): targetFrameId_("/map"), objFramePrefix_("object"){
+        ros::NodeHandle nh_private("~");
+        nh_private.param("target_frame_id", targetFrameId_, targetFrameId_);
+        nh_private.param("object_prefix", objFramePrefix_, objFramePrefix_);
 
-        ros::NodeHandle nh;
-        subs_ = nh.subscribe("objectsStamped", 1, &SignTransform::objectsDetectedCallback, this);
+        ros::NodeHandle nh_base;
+        subs_ = nh_base.subscribe("objectsStamped", 1, &ObstacleDetectionAndPositionCalculation::objectsDetectedCallback, this);
+
+        pub_pause_agv = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_PAUSE_GOAL), 1, false);
+        pub_resume_agv = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_RESUME_GOAL), 1, false);
+        pub_replan_agv = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_REPLAN_PATH), 1, false);
+
+        client_add_sign = nh_base.serviceClient<simulation::AddSignOnMapMsg>(str(constants::ADV_ENRICH_AUGMENTED_MAP));
+        client_remove_sign = nh_base.serviceClient<simulation::RemoveSignFromMapMsg>(str(constants::ADV_IMPOVERISH_AUGMENTED_MAP));
     }
 
     // Here I synchronize with the ObjectsStamped topic to
@@ -75,40 +96,58 @@ public:
 
                 // "object_1", "object_1_b", "object_1_c", "object_2"
                 std::string objectFrameId = QString("%1_%2%3").arg(objFramePrefix_.c_str()).arg(id).arg(multiSuffix).toStdString();
-
+                ROS_DEBUG("ODPC_1");
                 tf::StampedTransform pose;
                 tf::StampedTransform poseCam;
                 try{
+                    ROS_DEBUG("ODPC_2");
                     // Get transformation from "object_#" frame to target frame
-                    // The timestamp matches the one sent over TF
-//                    tfListener_.lookupTransform(targetFrameId_, ros::Time::now(), objectFrameId, ros::Time(0), targetFrameId_,pose);
-//                    tfListener_.lookupTransform(msg->header.frame_id, ros::Time::now(), objectFrameId, ros::Time(0), msg->header.frame_id, poseCam);
-
                     tfListener_.waitForTransform(targetFrameId_, objectFrameId, msg->header.stamp, ros::Duration(1.0));
                     tfListener_.lookupTransform(targetFrameId_, objectFrameId, msg->header.stamp, pose);
                 }
                 catch(tf::TransformException & ex){
+                    ROS_DEBUG("ODPC_2.1");
                     ROS_WARN("%s",ex.what());
                     continue;
                 }
 
                 Obstacle obstacle(pose.getOrigin().x(), pose.getOrigin().y(), pose.getOrigin().z());
                 if(cache.addElement(obstacle)){
-                    ROS_INFO("New element has been added to the Cache");
+                    ROS_DEBUG("ODPC_3");
+                    ROS_INFO("Cache has been populated with a new obstacle.");
+                    pub_pause_agv.publish(std_msgs::Empty());
+
+                    simulation::AddSignOnMapMsg msg;
+                    msg.request.sign_id = id;
+                    msg.request.x_center = pose.getOrigin().x();
+                    msg.request.y_center = pose.getOrigin().y();
+                    msg.request.dir_radians = tf::getYaw(pose.getRotation());
+                    if (client_add_sign.call(msg)){
+                        ROS_DEBUG("ODPC_4");
+
+                        if(msg.response.success){
+                            ROS_DEBUG("ODPC_5");
+
+                            ROS_INFO("%s executed successfully!", str(constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
+                            pub_replan_agv.publish(std_msgs::Empty());
+                            // send request to scheduler
+
+                        } else {
+                            ROS_DEBUG("ODPC_5.1");
+
+                            ROS_ERROR("%s failed!", str(constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
+                            cache.removeElement(obstacle);
+                            pub_resume_agv.publish(std_msgs::Empty());
+                        }
+                    } else {
+                        ROS_ERROR("Failed to call the %s service!", str(constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
+                        cache.removeElement(obstacle);
+                        pub_resume_agv.publish(std_msgs::Empty());
+                    }
                 } else{
-                    ROS_INFO("Element cannot be added, because it is already in the Cache");
+                    ROS_INFO("Cache already contains this detected obstacle. Simply ignore it.");
                 }
-                // Here "pose" is the position of the object "id" in target frame.
-                double yaw = tf::getYaw(pose.getRotation());
-                ROS_INFO("%f", yaw);
-                ROS_INFO("Object_%d [x,y,z] [x,y,z,w] in \"%s\" frame: [%f,%f,%f] [%f,%f,%f,%f]",
-                         id, targetFrameId_.c_str(),
-                         pose.getOrigin().x(), pose.getOrigin().y(), pose.getOrigin().z(),
-                         pose.getRotation().x(), pose.getRotation().y(), pose.getRotation().z(), pose.getRotation().w());
-//                ROS_INFO("Object_%d [x,y,z] [x,y,z,w] in \"%s\" frame: [%f,%f,%f] [%f,%f,%f,%f]",
-//                         id, msg->header.frame_id.c_str(),
-//                         poseCam.getOrigin().x(), poseCam.getOrigin().y(), poseCam.getOrigin().z(),
-//                         poseCam.getRotation().x(), poseCam.getRotation().y(), poseCam.getRotation().z(), poseCam.getRotation().w());
+                ROS_DEBUG("ODPC_6");
 
             }
         }
@@ -116,8 +155,8 @@ public:
 };
 
 int main(int argc, char * argv[]){
-    ros::init(argc, argv, "sign_tf_node");
-
-    SignTransform sync;
+    changeNodeLoggerLevel(ros::console::levels::Debug);
+    ros::init(argc, argv, str(NODE_NAME));
+    ObstacleDetectionAndPositionCalculation obstacle_dpc;
     ros::spin();
 }

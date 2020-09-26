@@ -4,6 +4,7 @@ float64 y_center
 float64 dir_radians
 ---
 bool success
+string entry_id
 float64 x1_intersection
 float64 y1_intersection
 float64 x2_intersection

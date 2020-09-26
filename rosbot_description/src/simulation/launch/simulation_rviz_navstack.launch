@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <launch>
 
+<!--    &lt;!&ndash; It changes a whole package Logger level  &ndash;&gt;-->
+<!--    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find simulation)/config/custom_rosconsole.conf"/>-->
+
+    <!-- MongoDb server-->
+    <include file="$(find mongodb_store)/launch/mongodb_store.launch"/>
+
     <!-- Map server -->
     <arg name="map_file" default="$(find simulation)/maps/maze.yaml"/>
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
@@ -35,7 +41,7 @@
         <remap from="cmd_vel" to="cmd_vel"/>
         <remap from="odom" to="odom"/>
         <remap from="scan" to="/scan"/>
-        <remap from="map" to="/augmented_map"/>
+        <remap from="map" to="/simulation/augmented_map"/>
 <!--        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />-->
     </node>
 
@@ -52,7 +58,7 @@
     </node>
 
     <!-- Displays the transform of the recognised sign -->
-    <node name="sign_tf_publisher" pkg="simulation" type="sign_tf_node" output="screen"/>
+    <node name="obstacle_dpc" pkg="simulation" type="obstacle_dpc_node" output="screen"/>
 
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>

@@ -80,7 +80,7 @@ public:
             pSource->x = feedback.get()->base_position.pose.position.x;
             pSource->y = feedback.get()->base_position.pose.position.y;
         }
-        ROS_INFO("Feedback msg received at pose (%.2f, %.2f)", feedback->base_position.pose.position.x, feedback->base_position.pose.position.y);
+        ROS_DEBUG("Feedback msg received at pose (%.2f, %.2f)", feedback->base_position.pose.position.x, feedback->base_position.pose.position.y);
     }
 
     // Called once when the goal completes
