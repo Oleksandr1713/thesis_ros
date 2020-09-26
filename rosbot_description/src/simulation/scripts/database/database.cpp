@@ -3,21 +3,25 @@
 
 #include "database/db_proxy_decorator.h"
 #include "simulation/DatabaseEntry.h"
+#include "my_lib/auxiliary_func.h"
+#include "constants/Constants.h"
 
 
 using namespace mongodb_store;
 using namespace std;
 using namespace mongodb_proxy_decorator;
-using namespace simulation;
+//using namespace simulation;
+using namespace auxiliary_func;
 
 
 int main(int argc, char * argv[]) {
     ros::init(argc, argv, "example");
     ros::NodeHandle nh;
 
-    MessageStoreProxy messageStore(nh, COLLECTION_NAME);
+    MessageStoreProxy messageStore(nh, str(constants::COLLECTION_NAME));
     DatabaseEntry dbEntry;
-    dbEntry.x_coordinate = 10;
+    dbEntry.x_center = 144440;
+    dbEntry.y_center = -55555;
     dbEntry.job_id = 777;
 
     // insert entry

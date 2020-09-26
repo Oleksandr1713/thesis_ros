@@ -76,25 +76,25 @@
       <pose frame=''>0.497681 0 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>3469 840000000</sim_time>
-      <real_time>551 493185346</real_time>
-      <wall_time>1588897021 741622928</wall_time>
-      <iterations>55109</iterations>
+      <sim_time>3678 690000000</sim_time>
+      <real_time>216 142185569</real_time>
+      <wall_time>1600942423 685958710</wall_time>
+      <iterations>20885</iterations>
       <model name='Stop Sign'>
-        <pose frame=''>-2.00335 1.0312 -1.20933 0 -0 0</pose>
+        <pose frame=''>-1.83887 0.124447 -1.21789 0 -0 1.23488</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-2.00335 1.0312 -1.20933 0 -0 0</pose>
+          <pose frame=''>-1.83887 0.124447 -1.21789 0 -0 1.23488</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Stop Sign_0'>
-        <pose frame=''>-0.497188 -2.30083 -1.20523 0 0 -1.56391</pose>
+        <pose frame=''>-0.482173 -2.26149 -1.23125 0 -0 1.76446</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-0.497188 -2.30083 -1.20523 0 0 -1.56391</pose>
+          <pose frame=''>-0.482173 -2.26149 -1.23125 0 -0 1.76446</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -576,7 +576,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>9.03176 -2.55301 1.73633 0 0.430204 -3.03422</pose>
+        <pose frame=''>10.1893 0.014848 7.1572 0 0.754204 -3.05822</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>

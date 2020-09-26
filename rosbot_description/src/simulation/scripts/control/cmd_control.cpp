@@ -24,16 +24,17 @@ public:
     ros::Subscriber sub_replan_path;
 
 public:
-    explicit CommandLineControl(ros::NodeHandle& nh) {
-        pub_garbage_collector = nh.advertise<std_msgs::Empty>(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
-        sub_garbage_collector = nh.subscribe(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
+    explicit CommandLineControl() {
+        ros::NodeHandle nh_base;
+        pub_garbage_collector = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
+        sub_garbage_collector = nh_base.subscribe(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
 
-        sub_go_to = nh.subscribe(str(constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
-        sub_cancel_goal = nh.subscribe(str(constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
-        sub_pause_goal = nh.subscribe(str(constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
-        sub_resume_goal = nh.subscribe(str(constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
+        sub_go_to = nh_base.subscribe(str(constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
+        sub_cancel_goal = nh_base.subscribe(str(constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
+        sub_pause_goal = nh_base.subscribe(str(constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
+        sub_resume_goal = nh_base.subscribe(str(constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
 
-        sub_replan_path = nh.subscribe(str(constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
+        sub_replan_path = nh_base.subscribe(str(constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
     }
 
     void resetUniquePtrCallback(std_msgs::Empty msg) {
@@ -100,9 +101,9 @@ public:
 };
 
 int main(int argc, char** argv){
+    /*changeNodeLoggerLevel(ros::console::levels::Debug);*/
     ros::init(argc, argv, str(NODE_NAME));
-    ros::NodeHandle nh("~");
-    CommandLineControl cmd_control(nh);
+    CommandLineControl cmd_control;
     ros::spin();
     return 0;
 }

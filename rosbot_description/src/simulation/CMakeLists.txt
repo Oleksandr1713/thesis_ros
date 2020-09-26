@@ -101,14 +101,14 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/simulation_node.cpp)
 add_executable(sign_coordinates_node scripts/sign_coordinates_on_image.cpp)
-add_executable(sign_tf_node scripts/sign_tf.cpp)
+add_executable(obstacle_dpc_node scripts/observation/obstacle_det_pos_calc.cpp)
 add_executable(job_scheduler_node scripts/scheduler/job_scheduler.cpp)
 add_executable(job_catcher_node scripts/catcher/job_catcher.cpp)
 add_executable(database_node scripts/database/database.cpp)
 add_executable(map_enrichment_node scripts/enrichment/map_enrichment.cpp)
 add_executable(cmd_control_node scripts/control/cmd_control.cpp)
 
-add_executable(cache scripts/cache.cpp)
+add_executable(cache scripts/observation/cache.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -119,7 +119,7 @@ add_executable(cache scripts/cache.cpp)
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} )
 target_link_libraries(sign_coordinates_node ${catkin_LIBRARIES})
-target_link_libraries(sign_tf_node ${catkin_LIBRARIES} Qt5::Core)
+target_link_libraries(obstacle_dpc_node ${catkin_LIBRARIES} Qt5::Core)
 target_link_libraries(job_scheduler_node ${catkin_LIBRARIES})
 target_link_libraries(job_catcher_node ${catkin_LIBRARIES})
 target_link_libraries(database_node ${catkin_LIBRARIES})
@@ -129,7 +129,7 @@ target_link_libraries(cmd_control_node ${catkin_LIBRARIES})
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(sign_coordinates_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(sign_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(obstacle_dpc_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(job_scheduler_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(job_catcher_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(database_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
