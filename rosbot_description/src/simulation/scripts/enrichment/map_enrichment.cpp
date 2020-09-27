@@ -7,9 +7,9 @@
 #include "simulation/AddSignOnMapMsg.h"
 #include "simulation/RemoveSignFromMapMsg.h"
 #include "my_lib/auxiliary_func.h"
-#include "constants/Constants.h"
+#include "constants/node_constants.h"
 
-#include "simulation/DatabaseEntry.h"
+#include "simulation/DatabaseEntryInsert.h"
 #include "mongodb_store/message_store.h"
 #include "database/db_proxy_decorator.h"
 
@@ -46,10 +46,10 @@ private:
 
 public:
     explicit MapEnrichment(): nh_base(){
-        client_map_server = nh_base.serviceClient<nav_msgs::GetMap>(str(constants::REQ_ORIGINAL_MAP));
-        srv_add_sign = nh_base.advertiseService(str(constants::ADV_ENRICH_AUGMENTED_MAP), &MapEnrichment::addSignOnMap, this);
-        srv_remove_sign = nh_base.advertiseService(str(constants::ADV_IMPOVERISH_AUGMENTED_MAP), &MapEnrichment::removeSignFromMap, this);
-        pub_map = nh_base.advertise<nav_msgs::OccupancyGrid>(str(constants::PUB_AUGMENTED_MAP), 1, true);
+        client_map_server = nh_base.serviceClient<nav_msgs::GetMap>(str(node_constants::REQ_ORIGINAL_MAP));
+        srv_add_sign = nh_base.advertiseService(str(node_constants::ADV_ENRICH_AUGMENTED_MAP), &MapEnrichment::addSignOnMap, this);
+        srv_remove_sign = nh_base.advertiseService(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP), &MapEnrichment::removeSignFromMap, this);
+        pub_map = nh_base.advertise<nav_msgs::OccupancyGrid>(str(node_constants::PUB_AUGMENTED_MAP), 1, true);
 
         nav_msgs::GetMap srv;
         client_map_server.call(srv);
@@ -293,9 +293,8 @@ private:
     }
 
     std::string saveDataToDatabase(simulation::AddSignOnMapMsg::Request &request, simulation::AddSignOnMapMsg::Response &response){
-        MessageStoreProxy messageStore(nh_base, str(constants::COLLECTION_NAME));
-        DatabaseEntry dbEntry;
-        dbEntry.sign_id = request.sign_id;
+        MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
+        DatabaseEntryInsert dbEntry;
         dbEntry.x_center = request.x_center;
         dbEntry.y_center = request.y_center;
         dbEntry.yaw = request.dir_radians;
@@ -304,6 +303,11 @@ private:
         dbEntry.x2_intersection = response.x2_intersection;
         dbEntry.y2_intersection = response.y2_intersection;
         return insertNewEntry(messageStore, dbEntry);
+    }
+
+    bool deleteDataFromDatabase(simulation::RemoveSignFromMapMsg::Request &request){
+        MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
+        return deleteEntry(messageStore, request.entry_id);
     }
 
     bool addSignOnMap(simulation::AddSignOnMapMsg::Request &request, simulation::AddSignOnMapMsg::Response &response){
@@ -355,6 +359,8 @@ private:
 
         response.success = success;
         if(success){
+            deleteDataFromDatabase(request);
+
             nav_msgs::OccupancyGrid augmentedMapOG;
             grid_map::GridMapRosConverter::toOccupancyGrid(*map, AUGMENTED_LAYER,0.0, 1.0, augmentedMapOG);
 

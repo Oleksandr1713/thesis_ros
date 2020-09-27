@@ -1,7 +1,6 @@
+string entry_id
 int64 sign_id
-int64 time_start    # time in seconds since Unix epoch
-float64 x_coordinate
-float64 y_coordinate
 ---
+bool success
 string entry_id
 int64 job_id

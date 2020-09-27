@@ -57,8 +57,11 @@
         <remap from="depth_registered/camera_info" to="/camera/depth/camera_info"/>
     </node>
 
-    <!-- Displays the transform of the recognised sign -->
+    <!-- Obstacle detection and its position calculation -->
     <node name="obstacle_dpc" pkg="simulation" type="obstacle_dpc_node" output="screen"/>
+
+    <!-- Job scheduler -->
+    <node name="job_scheduler" pkg="simulation" type="job_scheduler_node" output="screen"/>
 
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>

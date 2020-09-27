@@ -30,7 +30,8 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
 ## Generate messages in the 'msg' folder
  add_message_files(
    FILES
-   DatabaseEntry.msg
+   DatabaseEntryInsert.msg
+   DatabaseEntryUpdate.msg
    JobBriefInfo.msg
  )
 

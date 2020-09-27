@@ -27,12 +27,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tf/transform_listener.h>
 #include <find_object_2d/ObjectsStamped.h>
 #include <QtCore/QString>
+#include <simulation/ScheduleJobMsg.h>
 #include "cache/cache.h"
 #include "cache/obstacle.h"
 #include "simulation/AddSignOnMapMsg.h"
 #include "simulation/RemoveSignFromMapMsg.h"
 #include "my_lib/auxiliary_func.h"
-#include "constants/Constants.h"
+#include "constants/node_constants.h"
 
 using namespace auxiliary_func;
 
@@ -50,6 +51,7 @@ private:
     ros::Publisher pub_replan_agv;
     ros::ServiceClient client_add_sign;
     ros::ServiceClient client_remove_sign;
+    ros::ServiceClient client_schedule_job;
     tf::TransformListener tfListener_;
     Cache cache;
 
@@ -62,12 +64,35 @@ public:
         ros::NodeHandle nh_base;
         subs_ = nh_base.subscribe("objectsStamped", 1, &ObstacleDetectionAndPositionCalculation::objectsDetectedCallback, this);
 
-        pub_pause_agv = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_PAUSE_GOAL), 1, false);
-        pub_resume_agv = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_RESUME_GOAL), 1, false);
-        pub_replan_agv = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_REPLAN_PATH), 1, false);
+        pub_pause_agv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_PAUSE_GOAL), 1, false);
+        pub_resume_agv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_RESUME_GOAL), 1, false);
+        pub_replan_agv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_REPLAN_PATH), 1, false);
 
-        client_add_sign = nh_base.serviceClient<simulation::AddSignOnMapMsg>(str(constants::ADV_ENRICH_AUGMENTED_MAP));
-        client_remove_sign = nh_base.serviceClient<simulation::RemoveSignFromMapMsg>(str(constants::ADV_IMPOVERISH_AUGMENTED_MAP));
+        client_add_sign = nh_base.serviceClient<simulation::AddSignOnMapMsg>(str(node_constants::ADV_ENRICH_AUGMENTED_MAP));
+        client_remove_sign = nh_base.serviceClient<simulation::RemoveSignFromMapMsg>(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP));
+        client_schedule_job = nh_base.serviceClient<simulation::ScheduleJobMsg>(str(node_constants::ADV_JOB_SCHEDULER));
+    }
+
+private:
+
+    void cleanUpWhenAddSignSrvFailed(Obstacle& obstacle){
+        cache.removeElement(obstacle);
+        pub_resume_agv.publish(std_msgs::Empty());
+    }
+
+    void cleanUpWhenSchedulerSrvFailed(Obstacle& obstacle, simulation::AddSignOnMapMsg& asom_msg){
+        simulation::RemoveSignFromMapMsg rsfm_msg;
+        rsfm_msg.request.entry_id = asom_msg.response.entry_id;
+        rsfm_msg.request.x_center = asom_msg.request.x_center;
+        rsfm_msg.request.y_center = asom_msg.request.y_center;
+        rsfm_msg.request.x1_intersection = asom_msg.response.x1_intersection;
+        rsfm_msg.request.y1_intersection = asom_msg.response.y1_intersection;
+        rsfm_msg.request.x2_intersection = asom_msg.response.x2_intersection;
+        rsfm_msg.request.y2_intersection = asom_msg.response.y2_intersection;
+
+        client_remove_sign.call(rsfm_msg); // here maybe can be added additional check
+        cache.removeElement(obstacle);
+        pub_resume_agv.publish(std_msgs::Empty());
     }
 
     // Here I synchronize with the ObjectsStamped topic to
@@ -96,58 +121,75 @@ public:
 
                 // "object_1", "object_1_b", "object_1_c", "object_2"
                 std::string objectFrameId = QString("%1_%2%3").arg(objFramePrefix_.c_str()).arg(id).arg(multiSuffix).toStdString();
-                ROS_DEBUG("ODPC_1");
+                ROS_DEBUG("ODPC_1_start");
                 tf::StampedTransform pose;
                 tf::StampedTransform poseCam;
                 try{
-                    ROS_DEBUG("ODPC_2");
+                    ROS_DEBUG("ODPC_2.1");
                     // Get transformation from "object_#" frame to target frame
                     tfListener_.waitForTransform(targetFrameId_, objectFrameId, msg->header.stamp, ros::Duration(1.0));
                     tfListener_.lookupTransform(targetFrameId_, objectFrameId, msg->header.stamp, pose);
                 }
                 catch(tf::TransformException & ex){
-                    ROS_DEBUG("ODPC_2.1");
+                    ROS_DEBUG("ODPC_2.2");
                     ROS_WARN("%s",ex.what());
                     continue;
                 }
 
                 Obstacle obstacle(pose.getOrigin().x(), pose.getOrigin().y(), pose.getOrigin().z());
+                // let's try to add a detected object to the cache
                 if(cache.addElement(obstacle)){
                     ROS_DEBUG("ODPC_3");
                     ROS_INFO("Cache has been populated with a new obstacle.");
                     pub_pause_agv.publish(std_msgs::Empty());
 
-                    simulation::AddSignOnMapMsg msg;
-                    msg.request.sign_id = id;
-                    msg.request.x_center = pose.getOrigin().x();
-                    msg.request.y_center = pose.getOrigin().y();
-                    msg.request.dir_radians = tf::getYaw(pose.getRotation());
-                    if (client_add_sign.call(msg)){
-                        ROS_DEBUG("ODPC_4");
-
-                        if(msg.response.success){
-                            ROS_DEBUG("ODPC_5");
-
-                            ROS_INFO("%s executed successfully!", str(constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
-                            pub_replan_agv.publish(std_msgs::Empty());
-                            // send request to scheduler
-
-                        } else {
+                    simulation::AddSignOnMapMsg asom_msg;
+                    asom_msg.request.x_center = pose.getOrigin().x();
+                    asom_msg.request.y_center = pose.getOrigin().y();
+                    asom_msg.request.dir_radians = tf::getYaw(pose.getRotation());
+                    // let's try to reflect the detected object on a static map
+                    if (client_add_sign.call(asom_msg)){
+                        ROS_DEBUG("ODPC_4.1");
+                        // let's check the success of reflecting the detected object on the static map
+                        if(asom_msg.response.success){
                             ROS_DEBUG("ODPC_5.1");
+                            ROS_INFO("%s executed successfully!", str(node_constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
 
-                            ROS_ERROR("%s failed!", str(constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
-                            cache.removeElement(obstacle);
-                            pub_resume_agv.publish(std_msgs::Empty());
+                            simulation::ScheduleJobMsg sj_msg;
+                            sj_msg.request.entry_id = asom_msg.response.entry_id;
+                            sj_msg.request.sign_id = id;
+                            // let's try to schedule a time of a object's removal from the static map
+                            if (client_schedule_job.call(sj_msg)){
+                                ROS_DEBUG("ODPC_6.1");
+                                // let's check the success of scheduling
+                                if(sj_msg.response.success){
+                                    ROS_DEBUG("ODPC_7.1");
+                                    ROS_INFO("%s executed successfully!", str(node_constants::ADV_JOB_SCHEDULER).c_str());
+                                    pub_replan_agv.publish(std_msgs::Empty());
+                                } else{
+                                    ROS_DEBUG("ODPC_7.2");
+                                    ROS_ERROR("%s failed!", str(node_constants::ADV_JOB_SCHEDULER).c_str());
+                                    cleanUpWhenSchedulerSrvFailed(obstacle, asom_msg);
+                                }
+                            } else{
+                                ROS_DEBUG("ODPC_6.2");
+                                ROS_ERROR("Failed to call the %s service!", str(node_constants::ADV_JOB_SCHEDULER).c_str());
+                                cleanUpWhenSchedulerSrvFailed(obstacle, asom_msg);
+                            }
+                        } else {
+                            ROS_DEBUG("ODPC_5.2");
+                            ROS_ERROR("%s failed!", str(node_constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
+                            cleanUpWhenAddSignSrvFailed(obstacle);
                         }
                     } else {
-                        ROS_ERROR("Failed to call the %s service!", str(constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
-                        cache.removeElement(obstacle);
-                        pub_resume_agv.publish(std_msgs::Empty());
+                        ROS_DEBUG("ODPC_4.2");
+                        ROS_ERROR("Failed to call the %s service!", str(node_constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
+                        cleanUpWhenAddSignSrvFailed(obstacle);
                     }
                 } else{
                     ROS_INFO("Cache already contains this detected obstacle. Simply ignore it.");
                 }
-                ROS_DEBUG("ODPC_6");
+                ROS_DEBUG("ODPC_1_end");
 
             }
         }

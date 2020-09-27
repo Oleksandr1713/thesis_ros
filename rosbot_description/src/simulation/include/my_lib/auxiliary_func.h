@@ -5,16 +5,25 @@
 #include <fstream>
 #include <math.h>
 #include <ros/console.h>
+#include <unistd.h>
 
 
 namespace auxiliary_func {
 
-    const std::string LOG_RELATIVE_ADDRESS = "../../../src/rosbot_description/src/simulation/scripts/scheduler/log.txt";
-    const std::string SOUND_RELATIVE_ADDRESS = "../../../src/rosbot_description/src/simulation/include/my_lib/sound.sh";
+    const std::string LOG_ABSOLUTE_PATH = "/home/oleksandr/Documents/thesis/rosbot_ws/src/rosbot_description/src/simulation/scripts/scheduler/log.txt";
+    const std::string SOUND_ABSOLUTE_PATH = "/home/oleksandr/Documents/thesis/rosbot_ws/src/rosbot_description/src/simulation/include/my_lib/sound.sh";
 
+    /* This function allows to determine a default absolute address to a folder, where
+     * a compiled executable file, which invokes this function, is located */
+    char* getDirectoryAddressOfCurrentExecutable(){
+        return get_current_dir_name();
+    }
+
+    /* If you want to use this function, a proper absolute path to your desired log file must be set.
+     * Therefore, adjust the address above according to your OS configuration */
     int writeToLogFile(std::string data){
         std::ofstream file;
-        file.open(LOG_RELATIVE_ADDRESS, std::ofstream::app);
+        file.open(LOG_ABSOLUTE_PATH, std::ofstream::app);
         file << data << "\n";
         file.close();
         return 0;
@@ -30,8 +39,10 @@ namespace auxiliary_func {
         return  asctime(localtime(&seconds));
     }
 
+    /* If you want to use this function, a proper absolute path to your desired bash file must be set.
+     * Therefore, adjust the address above according to your OS configuration */
     bool makeSound(){
-        std::string cmd = "bash " + SOUND_RELATIVE_ADDRESS;
+        std::string cmd = "bash " + SOUND_ABSOLUTE_PATH;
         system(cmd.c_str());
         return true;
     }

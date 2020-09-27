@@ -1,4 +1,4 @@
-int64 sign_id
+string entry_id
 float64 x_center
 float64 y_center
 float64 x1_intersection
