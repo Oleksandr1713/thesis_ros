@@ -3,10 +3,10 @@
 #include <fstream>
 
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 #include "mongodb_store/message_store.h"
 #include "database/db_proxy_decorator.h"
-#include "constants/Constants.h"
+#include "constants/node_constants.h"
+#include "constants/obstacle_constants.h"
 #include "my_lib/auxiliary_func.h"
 #include "simulation/ScheduleJobMsg.h"
 #include "simulation/JobBriefInfo.h"
@@ -17,48 +17,65 @@ using namespace mongodb_proxy_decorator;
 using namespace auxiliary_func;
 using namespace simulation;
 
+/* ROS node name*/
+constexpr static const char* NODE_NAME = "job_scheduler_node";
+
 class JobScheduler{
 
 private:
     MessageStoreProxy messageStore;
+    ros::ServiceServer srv_schedule_job;
 
 public:
-    JobScheduler(ros::NodeHandle& nodeHandle, const string& collectionName) : messageStore(nodeHandle, collectionName){};
+    JobScheduler(ros::NodeHandle& nh_base) : messageStore(nh_base, str(node_constants::COLLECTION_NAME)){
+        srv_schedule_job = nh_base.advertiseService(str(node_constants::ADV_JOB_SCHEDULER), &JobScheduler::callback, this);
+        ROS_INFO("Scheduler service is up.");
+    };
 
-    ~JobScheduler()= default;
+    ~JobScheduler(){
+        ROS_INFO("Scheduler service is destroyed.");
+    };
 
     bool callback(ScheduleJobMsg::Request& request, ScheduleJobMsg::Response& response){
         bool success = false;
-        DatabaseEntry dbEntry;
+
+        ROS_DEBUG("JC_1");
+        DatabaseEntryUpdate dbEntry;
         dbEntry.sign_id = request.sign_id;
-        dbEntry.time_start = request.time_start;    // time in seconds since Unix epoch
-        dbEntry.time_end = calculateUpperTimeOfSignValidity(request.sign_id, request.time_start);  // time in seconds since Unix epoch
-//        dbEntry.x_coordinate = request.x_coordinate;
-//        dbEntry.y_coordinate = request.y_coordinate;
+        dbEntry.time_start = getCurrentDatetimeInSeconds();                                                // time in seconds since Unix epoch
+        dbEntry.time_end = calculateUpperTimeOfSignValidity(request.sign_id, dbEntry.time_start);   // time in seconds since Unix epoch
 
-        string entry_id = insertNewEntry(messageStore, dbEntry);
-        response.entry_id = entry_id;
-
+        ROS_DEBUG("JC_2");
         JobBriefInfo jobInfo;
-        jobInfo.entry_id = entry_id;
+        jobInfo.entry_id = request.entry_id;
         long job_id = scheduleJob(dbEntry.time_end, jobInfo);
 
+        ROS_DEBUG("JC_3");
         if(job_id != 0){
-            dbEntry.id = entry_id;
+            ROS_DEBUG("JC_4");
             dbEntry.job_id = job_id;
-            success = updateEntry(messageStore, entry_id, dbEntry);
+            success = updateEntry(messageStore, request.entry_id, dbEntry);
             response.job_id = job_id;
         }
+        ROS_DEBUG("JC_5");
+        response.success = success;
 
         return success;
     }
 
 private:
     long calculateUpperTimeOfSignValidity(long& sign_id, long& sign_time_start){
-        /*This method must be further extended to consider information about
-         * different sign types and their different time validities. */
         long current = getCurrentDatetimeInSeconds();
-        return current + 120;
+        switch(sign_id) {
+            case obstacle_constants::STOP_SIGN_ID:
+                return current + obstacle_constants::STOP_SIGN_LIFESPAN;
+            case obstacle_constants::BLOCK_SIGN_ID:
+                return current + obstacle_constants::BLOCK_SIGN_LIFESPAN;
+            case obstacle_constants::CLOSED_SIGN_ID:
+                return current + obstacle_constants::CLOSED_SIGN_ID;
+            default:
+                return current + obstacle_constants::STOP_SIGN_LIFESPAN;
+        }
     }
 
     string getDateTimeForAT(long int& seconds){
@@ -84,6 +101,7 @@ private:
         /* this function schedules the execution of the ros command, which publishes
          * the message to the ros topic. */
         long job_id = 0;
+        ROS_DEBUG("JC_SJ_1");
         string cmd = R"(echo "rostopic pub -1 /catcher simulation/JobBriefInfo -- \"')";
         cmd.append(msg.entry_id);
         cmd.append(R"('\"")");
@@ -105,8 +123,10 @@ private:
         }
         pclose(stream);
 
+        ROS_DEBUG("JC_SJ_2");
         writeToLogFile(cmd_output); // this line is needed only for a debug purpose
 
+        ROS_DEBUG("JC_SJ_3");
         regex regexp("job ([0-9]+) at");
         smatch match;
         if (regex_search(cmd_output, match, regexp)) {
@@ -126,9 +146,7 @@ private:
 };
 
 
-/*
-    method below is needed only for debugging
-*/
+/* Method below is needed only for debugging */
 string getDateTimeForAT_Test(long int& seconds){
     /* This function represents date and time in [[CC]YY]MMDDhhmm[.ss] format,
      that is used by AT command-line utility */
@@ -149,9 +167,7 @@ string getDateTimeForAT_Test(long int& seconds){
     return result;
 }
 
-/*
-    method below is needed only for debugging
-*/
+/* Method below is needed only for debugging */
 long int scheduleJob_Test(long int scheduledTime){
     long int job_id = 0;
     string cmd = R"(echo "rostopic pub -1 /catcher simulation/JobBriefInfo -- \"')";
@@ -193,28 +209,14 @@ long int scheduleJob_Test(long int scheduledTime){
 
 
 int main(int argc, char * argv[]) {
-    ros::init(argc, argv, "job_scheduler_node");
-    ros::NodeHandle nh("~");
-
-    JobScheduler scheduler(nh, str(constants::COLLECTION_NAME));
-    ros::ServiceServer service = nh.advertiseService("scheduler_service", &JobScheduler::callback, &scheduler);
-
-    ROS_INFO("Scheduler service is up.");
+    changeNodeLoggerLevel(ros::console::levels::Debug);
+    ros::init(argc, argv, str(NODE_NAME));
+    ros::NodeHandle nh_base;
+    JobScheduler scheduler(nh_base);
     ros::spin();
+    return 0;
 
-//    long int currentTime = getCurrentDatetimeInSeconds();
-//////    secondsToDatetime(currentTime);
-////    long int a = scheduleJob(currentTime);
-////    removeJob(a);
-//    currentTime+=0;
-//    long int a = scheduleJob_Test(currentTime);
-//    getDateTimeForAT_Test(currentTime);
-
-//    string a = scheduleJob();
-//    cout << a;
-
-
-//    //Get the time and store it in the time variable.
-//    ros::Time time = ros::Time::now();
-//    std::cout << ros::Time::init();
+    /*long int currentTime = getCurrentDatetimeInSeconds();
+    long int a = scheduleJob_Test(currentTime);
+    getDateTimeForAT_Test(currentTime);*/
 }

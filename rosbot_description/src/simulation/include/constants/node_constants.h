@@ -1,7 +1,7 @@
-#ifndef SRC_CONSTANTS_H
-#define SRC_CONSTANTS_H
+#ifndef SRC_NODE_CONSTANTS_H
+#define SRC_NODE_CONSTANTS_H
 
-namespace constants {
+namespace node_constants {
 
 /**** MAP ENRICHMENT NODE ****/
 
@@ -24,9 +24,14 @@ namespace constants {
     constexpr static const char *TOPIC_REPLAN_PATH = "/simulation/replan_path";   // communication channel to find a new path to the already assigned destination goal
     constexpr static const char *TOPIC_GARBAGE_COLLECTOR = "/simulation/garbage_collector";  // communication channel to trigger a smart-pointer reset
 
+
 /**** MONGO DATABASE ****/
 
     constexpr static const char *COLLECTION_NAME = "ros_sign_info";
+
+
+/**** JOB SCHEDULER NODE ****/
+    constexpr static const char *ADV_JOB_SCHEDULER = "/simulation/schedule_job";
 }
 
-#endif //SRC_CONSTANTS_H
+#endif //SRC_NODE_CONSTANTS_H

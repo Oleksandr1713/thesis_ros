@@ -3,7 +3,7 @@
 #include <std_msgs/Empty.h>
 #include "control/move_base_client.h"
 #include "my_lib/auxiliary_func.h"
-#include "constants/Constants.h"
+#include "constants/node_constants.h"
 
 using namespace auxiliary_func;
 
@@ -26,15 +26,15 @@ public:
 public:
     explicit CommandLineControl() {
         ros::NodeHandle nh_base;
-        pub_garbage_collector = nh_base.advertise<std_msgs::Empty>(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
-        sub_garbage_collector = nh_base.subscribe(str(constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
+        pub_garbage_collector = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
+        sub_garbage_collector = nh_base.subscribe(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
 
-        sub_go_to = nh_base.subscribe(str(constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
-        sub_cancel_goal = nh_base.subscribe(str(constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
-        sub_pause_goal = nh_base.subscribe(str(constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
-        sub_resume_goal = nh_base.subscribe(str(constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
+        sub_go_to = nh_base.subscribe(str(node_constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
+        sub_cancel_goal = nh_base.subscribe(str(node_constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
+        sub_pause_goal = nh_base.subscribe(str(node_constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
+        sub_resume_goal = nh_base.subscribe(str(node_constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
 
-        sub_replan_path = nh_base.subscribe(str(constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
+        sub_replan_path = nh_base.subscribe(str(node_constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
     }
 
     void resetUniquePtrCallback(std_msgs::Empty msg) {

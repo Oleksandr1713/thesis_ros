@@ -2,9 +2,9 @@
 #include "mongodb_store/message_store.h"
 
 #include "database/db_proxy_decorator.h"
-#include "simulation/DatabaseEntry.h"
+#include "simulation/DatabaseEntryInsert.h"
 #include "my_lib/auxiliary_func.h"
-#include "constants/Constants.h"
+#include "constants/node_constants.h"
 
 
 using namespace mongodb_store;
@@ -18,8 +18,8 @@ int main(int argc, char * argv[]) {
     ros::init(argc, argv, "example");
     ros::NodeHandle nh;
 
-    MessageStoreProxy messageStore(nh, str(constants::COLLECTION_NAME));
-    DatabaseEntry dbEntry;
+    MessageStoreProxy messageStore(nh, str(node_constants::COLLECTION_NAME));
+    DatabaseEntryInsert dbEntry;
     dbEntry.x_center = 144440;
     dbEntry.y_center = -55555;
     dbEntry.job_id = 777;

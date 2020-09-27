@@ -2,7 +2,8 @@
 #define SRC_DB_PROXY_DECORATOR_H
 
 #include "mongodb_store/message_store.h"
-#include "simulation/DatabaseEntry.h"
+#include "simulation/DatabaseEntryInsert.h"
+#include "simulation/DatabaseEntryUpdate.h"
 
 using namespace mongodb_store;
 using namespace std;
@@ -10,7 +11,7 @@ using namespace simulation;
 
 namespace mongodb_proxy_decorator {
 
-    string insertNewEntry(MessageStoreProxy& db_proxy, DatabaseEntry& entry){
+    string insertNewEntry(MessageStoreProxy& db_proxy, DatabaseEntryInsert& entry){
         /* Populate database with a new entry and return its ID*/
         string id = db_proxy.insert(entry);
         entry.id = id;
@@ -18,8 +19,23 @@ namespace mongodb_proxy_decorator {
         return id;
     }
 
-    bool updateEntry(MessageStoreProxy& db_proxy, const string& entry_id, DatabaseEntry& entry){
-        return db_proxy.updateID(entry_id, entry);
+    boost::shared_ptr<DatabaseEntryInsert> getEntryById(MessageStoreProxy& db_proxy, const string& entry_id){
+        vector<boost::shared_ptr<DatabaseEntryInsert>> results;
+        boost::shared_ptr<DatabaseEntryInsert> entry;
+        if(db_proxy.queryID<DatabaseEntryInsert>(entry_id, results)){
+            entry = results[0];
+        }
+        results.clear();
+        return entry;
+    }
+
+    bool updateEntry(MessageStoreProxy& db_proxy, const string& entry_id, DatabaseEntryUpdate& updateFields){
+        boost::shared_ptr<DatabaseEntryInsert> dbEntry = getEntryById(db_proxy, entry_id);
+        dbEntry->sign_id = updateFields.sign_id;
+        dbEntry->job_id = updateFields.job_id;
+        dbEntry->time_start = updateFields.time_start;
+        dbEntry->time_end = updateFields.time_end;
+        return db_proxy.updateID(entry_id, dbEntry.operator*());
     }
 
     bool deleteEntry(MessageStoreProxy& db_proxy, const string& entry_id){
@@ -27,33 +43,23 @@ namespace mongodb_proxy_decorator {
         return db_proxy.deleteID(entry_id);
     }
 
-    boost::shared_ptr<DatabaseEntry> getEntryById(MessageStoreProxy& db_proxy, const string& entry_id){
-        vector<boost::shared_ptr<DatabaseEntry>> results;
-        boost::shared_ptr<DatabaseEntry> entry;
-        if(db_proxy.queryID<DatabaseEntry>(entry_id, results)){
-            entry = results[0];
-        }
-        results.clear();
-        return entry;
-    }
-
-    boost::shared_ptr<DatabaseEntry> getEntryByJobIdField(MessageStoreProxy& db_proxy, const int& job_id){
-        vector<boost::shared_ptr<DatabaseEntry>> results;
-        boost::shared_ptr<DatabaseEntry> entry;
+    boost::shared_ptr<DatabaseEntryInsert> getEntryByJobIdField(MessageStoreProxy& db_proxy, const int& job_id){
+        vector<boost::shared_ptr<DatabaseEntryInsert>> results;
+        boost::shared_ptr<DatabaseEntryInsert> entry;
 
         mongo::BSONObjBuilder message_query;
         message_query.append("job_id", job_id);
 
-        if(db_proxy.query<DatabaseEntry>(results, message_query.obj())){
+        if(db_proxy.query<DatabaseEntryInsert>(results, message_query.obj())){
             entry = results[0];
         }
         results.clear();
         return entry;
     }
 
-    vector<boost::shared_ptr<DatabaseEntry>> getAllEntries(MessageStoreProxy& db_proxy){
-        vector<boost::shared_ptr<DatabaseEntry>> results;
-        db_proxy.query<DatabaseEntry>(results);
+    vector<boost::shared_ptr<DatabaseEntryInsert>> getAllEntries(MessageStoreProxy& db_proxy){
+        vector<boost::shared_ptr<DatabaseEntryInsert>> results;
+        db_proxy.query<DatabaseEntryInsert>(results);
         return results;
     }
 
