@@ -39,6 +39,7 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
  add_service_files(
    FILES
    AddSignOnMapMsg.srv
+   CleanCacheMsg.srv
    RemoveSignFromMapMsg.srv
    ScheduleJobMsg.srv
  )

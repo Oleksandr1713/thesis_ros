@@ -31,6 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cache/cache.h"
 #include "cache/obstacle.h"
 #include "simulation/AddSignOnMapMsg.h"
+#include "simulation/CleanCacheMsg.h"
 #include "simulation/RemoveSignFromMapMsg.h"
 #include "my_lib/auxiliary_func.h"
 #include "constants/node_constants.h"
@@ -52,6 +53,7 @@ private:
     ros::ServiceClient client_add_sign;
     ros::ServiceClient client_remove_sign;
     ros::ServiceClient client_schedule_job;
+    ros::ServiceServer srv_clean_cache;
     tf::TransformListener tfListener_;
     Cache cache;
 
@@ -71,6 +73,8 @@ public:
         client_add_sign = nh_base.serviceClient<simulation::AddSignOnMapMsg>(str(node_constants::ADV_ENRICH_AUGMENTED_MAP));
         client_remove_sign = nh_base.serviceClient<simulation::RemoveSignFromMapMsg>(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP));
         client_schedule_job = nh_base.serviceClient<simulation::ScheduleJobMsg>(str(node_constants::ADV_JOB_SCHEDULER));
+
+        srv_clean_cache = nh_base.advertiseService(str(node_constants::ADV_CLEAN_CACHE), &ObstacleDetectionAndPositionCalculation::cleanCacheCallback, this);
     }
 
 private:
@@ -83,12 +87,6 @@ private:
     void cleanUpWhenSchedulerSrvFailed(Obstacle& obstacle, simulation::AddSignOnMapMsg& asom_msg){
         simulation::RemoveSignFromMapMsg rsfm_msg;
         rsfm_msg.request.entry_id = asom_msg.response.entry_id;
-        rsfm_msg.request.x_center = asom_msg.request.x_center;
-        rsfm_msg.request.y_center = asom_msg.request.y_center;
-        rsfm_msg.request.x1_intersection = asom_msg.response.x1_intersection;
-        rsfm_msg.request.y1_intersection = asom_msg.response.y1_intersection;
-        rsfm_msg.request.x2_intersection = asom_msg.response.x2_intersection;
-        rsfm_msg.request.y2_intersection = asom_msg.response.y2_intersection;
 
         client_remove_sign.call(rsfm_msg); // here maybe can be added additional check
         cache.removeElement(obstacle);
@@ -194,6 +192,14 @@ private:
             }
         }
     }
+
+    bool cleanCacheCallback(simulation::CleanCacheMsg::Request &request, simulation::CleanCacheMsg::Response &response){
+        Obstacle obstacle(request.x_center, request.y_center, 0);
+        bool result = cache.removeElement(obstacle);
+        response.success = result;
+        return result;
+    }
+
 };
 
 int main(int argc, char * argv[]){
