@@ -63,6 +63,21 @@ namespace auxiliary_func {
         }
     }
 
+    double getDegrees(double radians){
+        double degrees = radians * 180/M_PI;
+        while(degrees < 0){
+            degrees = 360 + degrees;
+        }
+        while(degrees > 360){
+            degrees = degrees - 360;
+        }
+        return degrees;
+    }
+
+    double getRadians(double degrees){
+        return degrees * M_PI/180;
+    }
+
 }
 
 #endif //SRC_AUXILIARY_FUNC_H
