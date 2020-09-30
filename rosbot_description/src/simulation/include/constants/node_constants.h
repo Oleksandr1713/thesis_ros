@@ -24,6 +24,9 @@ namespace node_constants {
     constexpr static const char *TOPIC_REPLAN_PATH = "/simulation/replan_path";   // communication channel to find a new path to the already assigned destination goal
     constexpr static const char *TOPIC_GARBAGE_COLLECTOR = "/simulation/garbage_collector";  // communication channel to trigger a smart-pointer reset
 
+    /* Delay in seconds before starting path re-planning */
+    static const double DELAY = 2.0;    // it`s needed to ensure that the static map has been updated and the node can use its updated version
+
 
 /**** MONGO DATABASE ****/
 

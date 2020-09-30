@@ -86,7 +86,10 @@ public:
 
     void replanPathCallback(std_msgs::Empty msg){
         if(mbc != nullptr && mbc->getCurrentSelfGoalState() == MoveBaseClient::PAUSED){
-            ROS_INFO("Path replanning has been started...");
+            ROS_INFO("Path re-planning has been started...");
+
+            ros::Duration(node_constants::DELAY).sleep();   // this line gives some delay to ensure that the static map update has occurred and is ready to be used
+
             boost::shared_ptr<geometry_msgs::Point> source = mbc->getPSource();
             boost::shared_ptr<geometry_msgs::Point> destination = mbc->getPDestination();
 
