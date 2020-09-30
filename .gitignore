@@ -1,5 +1,6 @@
 /CMakeLists.txt
 /.idea/
+/src/simulation/scripts/scheduler/log.txt
 /venv/
 
 # START: Lines are taken from mongodb_store .gitignore file
