@@ -1,9 +1,5 @@
 string entry_id
-float64 x_center
-float64 y_center
-float64 x1_intersection
-float64 y1_intersection
-float64 x2_intersection
-float64 y2_intersection
 ---
 bool success
+float64 x_center
+float64 y_center

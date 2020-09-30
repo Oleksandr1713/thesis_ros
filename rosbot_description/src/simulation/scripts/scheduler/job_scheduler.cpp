@@ -102,7 +102,7 @@ private:
          * the message to the ros topic. */
         long job_id = 0;
         ROS_DEBUG("JC_SJ_1");
-        string cmd = R"(echo "rostopic pub -1 /catcher simulation/JobBriefInfo -- \"')";
+        string cmd = R"(echo "rostopic pub -1 /simulation/catcher simulation/JobBriefInfo -- \"')";
         cmd.append(msg.entry_id);
         cmd.append(R"('\"")");
         cmd.append(" | ");

@@ -305,9 +305,14 @@ private:
         return insertNewEntry(messageStore, dbEntry);
     }
 
-    bool deleteDataFromDatabase(simulation::RemoveSignFromMapMsg::Request &request){
+    bool deleteDataFromDatabase(string const& entry_id){
         MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
-        return deleteEntry(messageStore, request.entry_id);
+        return deleteEntry(messageStore, entry_id);
+    }
+
+    boost::shared_ptr<DatabaseEntryInsert> getDataByIdFromDatabase(string const& entry_id){
+        MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
+        return getEntryById(messageStore, entry_id);
     }
 
     bool addSignOnMap(simulation::AddSignOnMapMsg::Request &request, simulation::AddSignOnMapMsg::Response &response){
@@ -351,22 +356,27 @@ private:
     }
 
     bool removeSignFromMap(simulation::RemoveSignFromMapMsg::Request &request, simulation::RemoveSignFromMapMsg::Response &response){
-        grid_map::Position sign_center(request.x_center, request.y_center);
-        grid_map::Position footprint_point_1(request.x1_intersection, request.y1_intersection);
-        grid_map::Position footprint_point_2(request.x2_intersection, request.y2_intersection);
+        boost::shared_ptr<DatabaseEntryInsert> dbEntry = getDataByIdFromDatabase(request.entry_id);
+
+        grid_map::Position sign_center(dbEntry->x_center, dbEntry->y_center);
+        grid_map::Position footprint_point_1(dbEntry->x1_intersection, dbEntry->y1_intersection);
+        grid_map::Position footprint_point_2(dbEntry->x2_intersection, dbEntry->y2_intersection);
 
         bool success = eraseSignFootprint(map, AUGMENTED_LAYER, sign_center, footprint_point_1, footprint_point_2);
 
         response.success = success;
         if(success){
-            deleteDataFromDatabase(request);
+            response.x_center = dbEntry->x_center;
+            response.y_center = dbEntry->y_center;
+
+            deleteDataFromDatabase(request.entry_id);
 
             nav_msgs::OccupancyGrid augmentedMapOG;
             grid_map::GridMapRosConverter::toOccupancyGrid(*map, AUGMENTED_LAYER,0.0, 1.0, augmentedMapOG);
 
             pub_map.publish(augmentedMapOG);
         }
-        return true;
+        return success;
     }
 };
 

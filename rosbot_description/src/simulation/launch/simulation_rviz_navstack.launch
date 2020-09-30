@@ -63,6 +63,9 @@
     <!-- Job scheduler -->
     <node name="job_scheduler" pkg="simulation" type="job_scheduler_node" output="screen"/>
 
+    <!-- Job catcher -->
+    <node name="job_catcher" pkg="simulation" type="job_catcher_node" output="screen"/>
+
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>
 
