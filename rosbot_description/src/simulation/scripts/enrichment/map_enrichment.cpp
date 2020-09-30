@@ -76,21 +76,6 @@ private:
         return (0 < std::abs (azimuth) && std::abs (azimuth) < 180);
     }
 
-    double getDegrees(double radians){
-        double degrees = radians * 180/M_PI;
-        while(degrees < 0){
-            degrees = 360 + degrees;
-        }
-        while(degrees > 360){
-            degrees = degrees - 360;
-        }
-        return degrees;
-    }
-
-    double getRadians(double degrees){
-        return degrees * M_PI/180;
-    }
-
     void getReferenceAzimuthPoint(grid_map::Position& referenceOriginPoint, double referenceAzimuth, grid_map::Position& referenceAzimuthPoint){
         referenceAzimuthPoint.x() = referenceOriginPoint.x() + UNIT_RADIUS * cos(getRadians(referenceAzimuth));
         referenceAzimuthPoint.y() = referenceOriginPoint.y() + UNIT_RADIUS * sin(getRadians(referenceAzimuth));

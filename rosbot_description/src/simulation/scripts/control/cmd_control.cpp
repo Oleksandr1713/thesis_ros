@@ -1,6 +1,8 @@
 #include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <std_msgs/Empty.h>
+#include "simulation/DestinationPose.h"
 #include "control/move_base_client.h"
 #include "my_lib/auxiliary_func.h"
 #include "constants/node_constants.h"
@@ -41,17 +43,41 @@ public:
         mbc.reset();
     }
 
-    void goToCallback(const geometry_msgs::Point::ConstPtr& msg){
+    double getVehicleOrientationInDegrees(const simulation::DestinationPose::ConstPtr& msg){
+        switch(msg->orientation.c_str()[0]){
+            case 'e': return node_constants::EAST;
+            case 'n': return node_constants::NORTH;
+            case 'w': return node_constants::WEST;
+            case 's': return node_constants::SOUTH;
+            default: return -1;
+        }
+    }
+
+    void goToCallback(const simulation::DestinationPose::ConstPtr& msg){
         if(mbc != nullptr){
             ROS_INFO("New goal cannot be assigned, because the old one has not reached!");
             ROS_INFO("Status of the old goal: %s", mbc->getCurrentActionLibGoalState().toString().c_str());
         } else {
-            mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
-            boost::shared_ptr<geometry_msgs::Point> goal = boost::shared_ptr<geometry_msgs::Point>(new geometry_msgs::Point);
-            goal->x = msg.get()->x;
-            goal->y = msg.get()->y;
-            goal->z = msg.get()->z;
-            mbc->goTo(goal);
+            double orientation_in_degrees = getVehicleOrientationInDegrees(msg);
+
+            if(orientation_in_degrees == -1){
+                ROS_WARN("Goal cannot be assigned, because received ros message is invalid! AGV orientation has not been set or set wrong!");
+            } else{
+                mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
+                boost::shared_ptr<geometry_msgs::Pose> goal = boost::shared_ptr<geometry_msgs::Pose>(new geometry_msgs::Pose);
+                goal->position.x = msg.get()->x;
+                goal->position.y = msg.get()->y;
+                goal->position.z = 0;
+
+                tf::Quaternion agv_orientation;
+                agv_orientation = tf::createQuaternionFromRPY(0,0, getRadians(orientation_in_degrees)).normalized();
+
+                goal->orientation.x = agv_orientation.x();
+                goal->orientation.y = agv_orientation.y();
+                goal->orientation.z = agv_orientation.z();
+                goal->orientation.w = agv_orientation.w();
+                mbc->goTo(goal);
+            }
         }
     }
 
@@ -62,7 +88,7 @@ public:
             ROS_INFO("Status of the goal: %s", mbc->getCurrentActionLibGoalState().toString().c_str());
             resetUniquePtrCallback(std_msgs::Empty());
         } else {
-            ROS_INFO("Nothing to cancel!");
+            ROS_WARN("Nothing to cancel!");
         }
     }
 
@@ -71,7 +97,7 @@ public:
             mbc->pauseGoal();
             ROS_INFO("Goal has been paused!");
         } else {
-            ROS_INFO("Nothing to pause!");
+            ROS_WARN("Nothing to pause!");
         }
     }
 
@@ -80,7 +106,7 @@ public:
             mbc->resumeGoal();
             ROS_INFO("Goal has been resumed!");
         } else {
-            ROS_INFO("Nothing to resume!");
+            ROS_WARN("Nothing to resume!");
         }
     }
 
@@ -90,15 +116,15 @@ public:
 
             ros::Duration(node_constants::DELAY).sleep();   // this line gives some delay to ensure that the static map update has occurred and is ready to be used
 
-            boost::shared_ptr<geometry_msgs::Point> source = mbc->getPSource();
-            boost::shared_ptr<geometry_msgs::Point> destination = mbc->getPDestination();
+            boost::shared_ptr<geometry_msgs::Pose> source = mbc->getPSource();
+            boost::shared_ptr<geometry_msgs::Pose> destination = mbc->getPDestination();
 
             resetUniquePtrCallback(std_msgs::Empty());
             mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
             mbc->setPSource(source);
             mbc->goTo(destination);
         } else {
-            ROS_INFO("Nothing to replan!");
+            ROS_WARN("Nothing to re-plan!");
         }
     }
 };

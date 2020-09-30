@@ -32,6 +32,7 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
    FILES
    DatabaseEntryInsert.msg
    DatabaseEntryUpdate.msg
+   DestinationPose.msg
    JobBriefInfo.msg
  )
 

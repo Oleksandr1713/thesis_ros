@@ -27,6 +27,12 @@ namespace node_constants {
     /* Delay in seconds before starting path re-planning */
     static const double DELAY = 2.0;    // it`s needed to ensure that the static map has been updated and the node can use its updated version
 
+    /* Orientation of AGV head at the destination point */
+    static const double EAST = 0;       // degrees
+    static const double NORTH = 90;     // degrees
+    static const double WEST = 180;     // degrees
+    static const double SOUTH = 270;    // degrees
+
 
 /**** MONGO DATABASE ****/
 
