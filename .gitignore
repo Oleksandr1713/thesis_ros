@@ -1,3 +1,4 @@
 /CMakeLists.txt
 /.idea/
+/src/simulation/scripts/scheduler/log.txt
 /venv/
