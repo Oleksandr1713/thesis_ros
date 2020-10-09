@@ -14,31 +14,32 @@ constexpr static const char* NODE_NAME = "cmd_control_node";
 
 class CommandLineControl{
 
-public:
+private:
     std::unique_ptr<MoveBaseClient> mbc;
 
-    ros::Publisher pub_garbage_collector;
-    ros::Subscriber sub_garbage_collector;
-    ros::Subscriber sub_go_to;
-    ros::Subscriber sub_cancel_goal;
-    ros::Subscriber sub_pause_goal;
-    ros::Subscriber sub_resume_goal;
-    ros::Subscriber sub_replan_path;
+    ros::Publisher pubGarbageCollector;
+    ros::Subscriber subGarbageCollector;
+    ros::Subscriber subGoTo;
+    ros::Subscriber subCancelGoal;
+    ros::Subscriber subPauseGoal;
+    ros::Subscriber subResumeGoal;
+    ros::Subscriber subReplanPath;
 
 public:
     explicit CommandLineControl() {
-        ros::NodeHandle nh_base;
-        pub_garbage_collector = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
-        sub_garbage_collector = nh_base.subscribe(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
+        ros::NodeHandle nhBase;
+        pubGarbageCollector = nhBase.advertise<std_msgs::Empty>(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
+        subGarbageCollector = nhBase.subscribe(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
 
-        sub_go_to = nh_base.subscribe(str(node_constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
-        sub_cancel_goal = nh_base.subscribe(str(node_constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
-        sub_pause_goal = nh_base.subscribe(str(node_constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
-        sub_resume_goal = nh_base.subscribe(str(node_constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
+        subGoTo = nhBase.subscribe(str(node_constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
+        subCancelGoal = nhBase.subscribe(str(node_constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
+        subPauseGoal = nhBase.subscribe(str(node_constants::TOPIC_PAUSE_GOAL), 1, &CommandLineControl::pauseGoalCallback, this);
+        subResumeGoal = nhBase.subscribe(str(node_constants::TOPIC_RESUME_GOAL), 1, &CommandLineControl::resumeGoalCallback, this);
 
-        sub_replan_path = nh_base.subscribe(str(node_constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
+        subReplanPath = nhBase.subscribe(str(node_constants::TOPIC_REPLAN_PATH), 1, &CommandLineControl::replanPathCallback, this);
     }
 
+private:
     void resetUniquePtrCallback(std_msgs::Empty msg) {
         mbc.reset();
     }
@@ -63,7 +64,7 @@ public:
             if(orientation_in_degrees == -1){
                 ROS_WARN("Goal cannot be assigned, because received ros message is invalid! AGV orientation has not been set or set wrong!");
             } else{
-                mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
+                mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pubGarbageCollector));
                 boost::shared_ptr<geometry_msgs::Pose> goal = boost::shared_ptr<geometry_msgs::Pose>(new geometry_msgs::Pose);
                 goal->position.x = msg.get()->x;
                 goal->position.y = msg.get()->y;
@@ -120,7 +121,7 @@ public:
             boost::shared_ptr<geometry_msgs::Pose> destination = mbc->getPDestination();
 
             resetUniquePtrCallback(std_msgs::Empty());
-            mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pub_garbage_collector));
+            mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pubGarbageCollector));
             mbc->setPSource(source);
             mbc->goTo(destination);
         } else {

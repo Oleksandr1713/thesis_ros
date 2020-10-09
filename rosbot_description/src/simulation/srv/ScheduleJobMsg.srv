@@ -1,5 +1,5 @@
 string entry_id
-int64 sign_id
+int64 object_id
 ---
 bool success
 string entry_id

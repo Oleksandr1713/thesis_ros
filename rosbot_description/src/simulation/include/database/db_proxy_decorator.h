@@ -31,7 +31,7 @@ namespace mongodb_proxy_decorator {
 
     bool updateEntry(MessageStoreProxy& db_proxy, const string& entry_id, DatabaseEntryUpdate& updateFields){
         boost::shared_ptr<DatabaseEntryInsert> dbEntry = getEntryById(db_proxy, entry_id);
-        dbEntry->sign_id = updateFields.sign_id;
+        dbEntry->object_id = updateFields.object_id;
         dbEntry->job_id = updateFields.job_id;
         dbEntry->time_start = updateFields.time_start;
         dbEntry->time_end = updateFields.time_end;
