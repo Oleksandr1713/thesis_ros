@@ -18,10 +18,10 @@ public:
         this->z = z;
     }
 
-    bool checkObstaclesSimilarity(Obstacle& test_obstacle){
-        return (x - X_DEV) < test_obstacle.x && test_obstacle.x < (x + X_DEV) &&
-               (y - Y_DEV) < test_obstacle.y && test_obstacle.y < (y + Y_DEV) &&
-               (z - Z_DEV) < test_obstacle.z && test_obstacle.z < (z + Z_DEV);
+    bool checkObstaclesSimilarity(Obstacle& testObstacle){
+        return (x - X_DEV) < testObstacle.x && testObstacle.x < (x + X_DEV) &&
+               (y - Y_DEV) < testObstacle.y && testObstacle.y < (y + Y_DEV) &&
+               (z - Z_DEV) < testObstacle.z && testObstacle.z < (z + Z_DEV);
     }
 };
 

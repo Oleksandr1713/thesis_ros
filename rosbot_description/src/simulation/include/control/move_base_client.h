@@ -20,14 +20,14 @@ public:
 private:
     ActionClient ac;
     State goalState;
-    ros::Publisher pub_garbage_collector;
+    ros::Publisher pubGarbageCollector;
     boost::shared_ptr<geometry_msgs::Pose> pSource;
     boost::shared_ptr<geometry_msgs::Pose> pDestination;
 
 public:
-    explicit MoveBaseClient(ros::Publisher& pub_garbage_collector): ac("move_base", true),
-                                                                    goalState(UNASSIGNED){
-        this->pub_garbage_collector = pub_garbage_collector;
+    explicit MoveBaseClient(ros::Publisher& pubGarbageCollector): ac("move_base", true),
+                                                                  goalState(UNASSIGNED){
+        this->pubGarbageCollector = pubGarbageCollector;
         ROS_INFO("Waiting for the move_base action server to come up");
         ac.waitForServer();
         ROS_INFO("Client is connected to the move_base action server successfully");
@@ -138,7 +138,7 @@ public:
     }
 
     void requestSelfDestruction(){
-        pub_garbage_collector.publish(std_msgs::Empty());
+        pubGarbageCollector.publish(std_msgs::Empty());
     }
 };
 #endif //SRC_MOVE_BASE_CLIENT_H

@@ -4,8 +4,8 @@
 <!--    &lt;!&ndash; It changes a whole package Logger level  &ndash;&gt;-->
 <!--    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find simulation)/config/custom_rosconsole.conf"/>-->
 
-    <!-- MongoDb server-->
-    <include file="$(find mongodb_store)/launch/mongodb_store.launch"/>
+<!--    &lt;!&ndash; MongoDb server&ndash;&gt;-->
+<!--    <include file="$(find mongodb_store)/launch/mongodb_store.launch"/>-->
 
     <!-- Map server -->
     <arg name="map_file" default="$(find simulation)/maps/maze.yaml"/>
@@ -45,7 +45,7 @@
 <!--        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />-->
     </node>
 
-    <!-- Image recognition -->
+    <!--&lt;!&ndash; Image recognition &ndash;&gt;
     <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
         <param name="gui" value="false"/>
         <param name="subscribe_depth" value="true"/>
@@ -57,14 +57,14 @@
         <remap from="depth_registered/camera_info" to="/camera/depth/camera_info"/>
     </node>
 
-    <!-- Obstacle detection and its position calculation -->
+    &lt;!&ndash; Obstacle detection and its position calculation &ndash;&gt;
     <node name="obstacle_dpc" pkg="simulation" type="obstacle_dpc_node" output="screen"/>
 
-    <!-- Job scheduler -->
+    &lt;!&ndash; Job scheduler &ndash;&gt;
     <node name="job_scheduler" pkg="simulation" type="job_scheduler_node" output="screen"/>
 
-    <!-- Job catcher -->
-    <node name="job_catcher" pkg="simulation" type="job_catcher_node" output="screen"/>
+    &lt;!&ndash; Job catcher &ndash;&gt;
+    <node name="job_catcher" pkg="simulation" type="job_catcher_node" output="screen"/>-->
 
     <!-- Show in Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>

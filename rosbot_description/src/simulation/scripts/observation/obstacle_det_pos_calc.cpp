@@ -30,9 +30,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <simulation/ScheduleJobMsg.h>
 #include "cache/cache.h"
 #include "cache/obstacle.h"
-#include "simulation/AddSignOnMapMsg.h"
+#include "simulation/AddObjectOnMapMsg.h"
 #include "simulation/CleanCacheMsg.h"
-#include "simulation/RemoveSignFromMapMsg.h"
+#include "simulation/RemoveObjectFromMapMsg.h"
 #include "my_lib/auxiliary_func.h"
 #include "constants/node_constants.h"
 
@@ -47,50 +47,50 @@ private:
     std::string targetFrameId_;
     std::string objFramePrefix_;
     ros::Subscriber subs_;
-    ros::Publisher pub_pause_agv;
-    ros::Publisher pub_resume_agv;
-    ros::Publisher pub_replan_agv;
-    ros::ServiceClient client_add_sign;
-    ros::ServiceClient client_remove_sign;
-    ros::ServiceClient client_schedule_job;
-    ros::ServiceServer srv_clean_cache;
+    ros::Publisher pubPauseAgv;
+    ros::Publisher pubResumeAgv;
+    ros::Publisher pubReplanAgv;
+    ros::ServiceClient clientAddObject;
+    ros::ServiceClient clientRemoveObject;
+    ros::ServiceClient clientScheduleJob;
+    ros::ServiceServer srvCleanCache;
     tf::TransformListener tfListener_;
     Cache cache;
 
 public:
     ObstacleDetectionAndPositionCalculation(): targetFrameId_("/map"), objFramePrefix_("object"){
-        ros::NodeHandle nh_private("~");
-        nh_private.param("target_frame_id", targetFrameId_, targetFrameId_);
-        nh_private.param("object_prefix", objFramePrefix_, objFramePrefix_);
+        ros::NodeHandle nhPrivate("~");
+        nhPrivate.param("target_frame_id", targetFrameId_, targetFrameId_);
+        nhPrivate.param("object_prefix", objFramePrefix_, objFramePrefix_);
 
         ros::NodeHandle nh_base;
         subs_ = nh_base.subscribe("objectsStamped", 1, &ObstacleDetectionAndPositionCalculation::objectsDetectedCallback, this);
 
-        pub_pause_agv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_PAUSE_GOAL), 1, false);
-        pub_resume_agv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_RESUME_GOAL), 1, false);
-        pub_replan_agv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_REPLAN_PATH), 1, false);
+        pubPauseAgv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_PAUSE_GOAL), 1, false);
+        pubResumeAgv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_RESUME_GOAL), 1, false);
+        pubReplanAgv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_REPLAN_PATH), 1, false);
 
-        client_add_sign = nh_base.serviceClient<simulation::AddSignOnMapMsg>(str(node_constants::ADV_ENRICH_AUGMENTED_MAP));
-        client_remove_sign = nh_base.serviceClient<simulation::RemoveSignFromMapMsg>(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP));
-        client_schedule_job = nh_base.serviceClient<simulation::ScheduleJobMsg>(str(node_constants::ADV_JOB_SCHEDULER));
+        clientAddObject = nh_base.serviceClient<simulation::AddObjectOnMapMsg>(str(node_constants::ADV_ENRICH_AUGMENTED_MAP));
+        clientRemoveObject = nh_base.serviceClient<simulation::RemoveObjectFromMapMsg>(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP));
+        clientScheduleJob = nh_base.serviceClient<simulation::ScheduleJobMsg>(str(node_constants::ADV_JOB_SCHEDULER));
 
-        srv_clean_cache = nh_base.advertiseService(str(node_constants::ADV_CLEAN_CACHE), &ObstacleDetectionAndPositionCalculation::cleanCacheCallback, this);
+        srvCleanCache = nh_base.advertiseService(str(node_constants::ADV_CLEAN_CACHE), &ObstacleDetectionAndPositionCalculation::cleanCacheCallback, this);
     }
 
 private:
 
-    void cleanUpWhenAddSignSrvFailed(Obstacle& obstacle){
+    void cleanUpWhenAddObjectSrvFailed(Obstacle& obstacle){
         cache.removeElement(obstacle);
-        pub_resume_agv.publish(std_msgs::Empty());
+        pubResumeAgv.publish(std_msgs::Empty());
     }
 
-    void cleanUpWhenSchedulerSrvFailed(Obstacle& obstacle, simulation::AddSignOnMapMsg& asom_msg){
-        simulation::RemoveSignFromMapMsg rsfm_msg;
-        rsfm_msg.request.entry_id = asom_msg.response.entry_id;
+    void cleanUpWhenSchedulerSrvFailed(Obstacle& obstacle, simulation::AddObjectOnMapMsg& aoom_msg){
+        simulation::RemoveObjectFromMapMsg rofm_msg;
+        rofm_msg.request.entry_id = aoom_msg.response.entry_id;
 
-        client_remove_sign.call(rsfm_msg); // here maybe can be added additional check
+        clientRemoveObject.call(rofm_msg); // here maybe can be added additional check
         cache.removeElement(obstacle);
-        pub_resume_agv.publish(std_msgs::Empty());
+        pubResumeAgv.publish(std_msgs::Empty());
     }
 
     // Here I synchronize with the ObjectsStamped topic to
@@ -139,50 +139,50 @@ private:
                 if(cache.addElement(obstacle)){
                     ROS_DEBUG("ODPC_3");
                     ROS_INFO("Cache has been populated with a new obstacle.");
-                    pub_pause_agv.publish(std_msgs::Empty());
+                    pubPauseAgv.publish(std_msgs::Empty());
 
-                    simulation::AddSignOnMapMsg asom_msg;
-                    asom_msg.request.x_center = pose.getOrigin().x();
-                    asom_msg.request.y_center = pose.getOrigin().y();
-                    asom_msg.request.dir_radians = tf::getYaw(pose.getRotation());
+                    simulation::AddObjectOnMapMsg aoom_msg;
+                    aoom_msg.request.x_center = pose.getOrigin().x();
+                    aoom_msg.request.y_center = pose.getOrigin().y();
+                    aoom_msg.request.dir_radians = tf::getYaw(pose.getRotation());
                     // let's try to reflect the detected object on a static map
-                    if (client_add_sign.call(asom_msg)){
+                    if (clientAddObject.call(aoom_msg)){
                         ROS_DEBUG("ODPC_4.1");
                         // let's check the success of reflecting the detected object on the static map
-                        if(asom_msg.response.success){
+                        if(aoom_msg.response.success){
                             ROS_DEBUG("ODPC_5.1");
                             ROS_INFO("%s executed successfully!", str(node_constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
 
                             simulation::ScheduleJobMsg sj_msg;
-                            sj_msg.request.entry_id = asom_msg.response.entry_id;
-                            sj_msg.request.sign_id = id;
+                            sj_msg.request.entry_id = aoom_msg.response.entry_id;
+                            sj_msg.request.object_id = id;
                             // let's try to schedule a time of a object's removal from the static map
-                            if (client_schedule_job.call(sj_msg)){
+                            if (clientScheduleJob.call(sj_msg)){
                                 ROS_DEBUG("ODPC_6.1");
                                 // let's check the success of scheduling
                                 if(sj_msg.response.success){
                                     ROS_DEBUG("ODPC_7.1");
                                     ROS_INFO("%s executed successfully!", str(node_constants::ADV_JOB_SCHEDULER).c_str());
-                                    pub_replan_agv.publish(std_msgs::Empty());
+                                    pubReplanAgv.publish(std_msgs::Empty());
                                 } else{
                                     ROS_DEBUG("ODPC_7.2");
                                     ROS_ERROR("%s failed!", str(node_constants::ADV_JOB_SCHEDULER).c_str());
-                                    cleanUpWhenSchedulerSrvFailed(obstacle, asom_msg);
+                                    cleanUpWhenSchedulerSrvFailed(obstacle, aoom_msg);
                                 }
                             } else{
                                 ROS_DEBUG("ODPC_6.2");
                                 ROS_ERROR("Failed to call the %s service!", str(node_constants::ADV_JOB_SCHEDULER).c_str());
-                                cleanUpWhenSchedulerSrvFailed(obstacle, asom_msg);
+                                cleanUpWhenSchedulerSrvFailed(obstacle, aoom_msg);
                             }
                         } else {
                             ROS_DEBUG("ODPC_5.2");
                             ROS_ERROR("%s failed!", str(node_constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
-                            cleanUpWhenAddSignSrvFailed(obstacle);
+                            cleanUpWhenAddObjectSrvFailed(obstacle);
                         }
                     } else {
                         ROS_DEBUG("ODPC_4.2");
                         ROS_ERROR("Failed to call the %s service!", str(node_constants::ADV_ENRICH_AUGMENTED_MAP).c_str());
-                        cleanUpWhenAddSignSrvFailed(obstacle);
+                        cleanUpWhenAddObjectSrvFailed(obstacle);
                     }
                 } else{
                     ROS_INFO("Cache already contains this detected obstacle. Simply ignore it.");

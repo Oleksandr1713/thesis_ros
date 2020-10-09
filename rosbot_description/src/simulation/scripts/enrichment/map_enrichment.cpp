@@ -4,8 +4,8 @@
 #include <grid_map_ros/GridMapRosConverter.hpp>
 #include <nav_msgs/OccupancyGrid.h>
 #include "nav_msgs/GetMap.h"
-#include "simulation/AddSignOnMapMsg.h"
-#include "simulation/RemoveSignFromMapMsg.h"
+#include "simulation/AddObjectOnMapMsg.h"
+#include "simulation/RemoveObjectFromMapMsg.h"
 #include "my_lib/auxiliary_func.h"
 #include "constants/node_constants.h"
 
@@ -32,29 +32,29 @@ public:
     const double AZIMUTH = 95;          // degrees
 
 private:
-    ros::NodeHandle nh_base;
+    ros::NodeHandle nhBase;
     grid_map::GridMap *map;
 
-    ros::ServiceClient client_map_server;
-    ros::ServiceServer srv_add_sign;
-    ros::ServiceServer srv_remove_sign;
+    ros::ServiceClient clientMapServer;
+    ros::ServiceServer srvAddObject;
+    ros::ServiceServer srvRemoveObject;
 
-    ros::Publisher pub_map;
-    ros::Publisher pub_signs;
-    ros::Publisher pub_map_update;
+    ros::Publisher pubMap;
 
 
 public:
-    explicit MapEnrichment(): nh_base(){
-        client_map_server = nh_base.serviceClient<nav_msgs::GetMap>(str(node_constants::REQ_ORIGINAL_MAP));
-        srv_add_sign = nh_base.advertiseService(str(node_constants::ADV_ENRICH_AUGMENTED_MAP), &MapEnrichment::addSignOnMap, this);
-        srv_remove_sign = nh_base.advertiseService(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP), &MapEnrichment::removeSignFromMap, this);
-        pub_map = nh_base.advertise<nav_msgs::OccupancyGrid>(str(node_constants::PUB_AUGMENTED_MAP), 1, true);
+    explicit MapEnrichment(): nhBase(){
+        clientMapServer = nhBase.serviceClient<nav_msgs::GetMap>(str(node_constants::REQ_ORIGINAL_MAP));
+        srvAddObject = nhBase.advertiseService(str(node_constants::ADV_ENRICH_AUGMENTED_MAP),
+                                               &MapEnrichment::addObjectOnMap, this);
+        srvRemoveObject = nhBase.advertiseService(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP),
+                                                  &MapEnrichment::removeObjectFromMap, this);
+        pubMap = nhBase.advertise<nav_msgs::OccupancyGrid>(str(node_constants::PUB_AUGMENTED_MAP), 1, true);
 
         nav_msgs::GetMap srv;
-        client_map_server.call(srv);
+        clientMapServer.call(srv);
         nav_msgs::OccupancyGrid *pStaticMapOccupancyGrid = &srv.response.map;
-        pub_map.publish(*pStaticMapOccupancyGrid);
+        pubMap.publish(*pStaticMapOccupancyGrid);
 
         map = new grid_map::GridMap({ORIGIN_LAYER, AUGMENTED_LAYER});
         grid_map::GridMapRosConverter::fromOccupancyGrid(*pStaticMapOccupancyGrid, ORIGIN_LAYER, *map);
@@ -144,13 +144,13 @@ private:
 
     /**
      * Method calculates the intersection point of the line with a single edge of the layer. The line is described as
-     * a linear equation obtained based on a coordinate of a sign origin, a sign direction and an azimuth angle, which is
-     * calculated relatively to the sign direction and describes a direction where the intersection must be found.
+     * a linear equation obtained based on a coordinate of a object origin, a object direction and an azimuth angle, which is
+     * calculated relatively to the object direction and describes a direction where the intersection must be found.
      *
      * @param layers A data structure containing a list of layers of a navigation environment.
-     * @param alterable_layer_name The name of layer, that includes information about sign footprints.
-     * @param sign_point The center coordinate of the sign : (x, y).
-     * @param sign_direction The angle in degrees between the x' axis (a perpendicular to a surface of a sign) and x axis (a part of
+     * @param alterable_layer_name The name of layer, that includes information about object footprints.
+     * @param object_point The center coordinate of the object : (x, y).
+     * @param object_direction The angle in degrees between the x' axis (a perpendicular to a surface of a object) and x axis (a part of
      * a Cartesian reference system of a layer frame).
      * @param edge_azimuth The relative shift in degrees to define the direction in which the intersection point must be
      * found.
@@ -158,7 +158,7 @@ private:
      * @return TRUE if everything goes well, or FALSE otherwise.
      */
     bool findIntersectionPointWithLayerEdge(grid_map::GridMap* layers, const std::string& alterable_layer_name,
-                                            grid_map::Position& sign_point, double sign_direction, double edge_azimuth, grid_map::Position& intersection_point){
+                                            grid_map::Position& object_point, double object_direction, double edge_azimuth, grid_map::Position& intersection_point){
         if(!isAzimuthValid(edge_azimuth)){
             return false;
         }
@@ -171,14 +171,14 @@ private:
         }
 
         grid_map::Position ref_azimuth_point;
-        getReferenceAzimuthPoint(sign_point, sign_direction + edge_azimuth, ref_azimuth_point);
+        getReferenceAzimuthPoint(object_point, object_direction + edge_azimuth, ref_azimuth_point);
 
         grid_map::Position intersection_1;
         grid_map::Position intersection_2;
-        findIntersectionsOfLineWithLayerEdgesOfMapFrame(bottom_left, top_right, sign_point, ref_azimuth_point, intersection_1, intersection_2);
+        findIntersectionsOfLineWithLayerEdgesOfMapFrame(bottom_left, top_right, object_point, ref_azimuth_point, intersection_1, intersection_2);
 
-        if(((intersection_1.x() <=  ref_azimuth_point.x() && ref_azimuth_point.x() <= sign_point.x()) || (sign_point.x() <= ref_azimuth_point.x() && ref_azimuth_point.x() <= intersection_1.x()))
-           && ((intersection_1.y() <=  ref_azimuth_point.y() && ref_azimuth_point.y() <= sign_point.y()) || (sign_point.y() <= ref_azimuth_point.y() && ref_azimuth_point.y() <= intersection_1.y()))){
+        if(((intersection_1.x() <=  ref_azimuth_point.x() && ref_azimuth_point.x() <= object_point.x()) || (object_point.x() <= ref_azimuth_point.x() && ref_azimuth_point.x() <= intersection_1.x()))
+           && ((intersection_1.y() <=  ref_azimuth_point.y() && ref_azimuth_point.y() <= object_point.y()) || (object_point.y() <= ref_azimuth_point.y() && ref_azimuth_point.y() <= intersection_1.y()))){
             intersection_point.x() = intersection_1.x();
             intersection_point.y() = intersection_1.y();
         } else{
@@ -209,34 +209,34 @@ private:
     }
 
     /**
-     * Method draws a full sign footprint on the layer. The full footprint line is a connection of 3 point:
-     * footprint_point_1 with sign_coordinate and sign_coordinate with footprint_point_2.
+     * Method draws a full object footprint on the layer. The full footprint line is a connection of 3 point:
+     * footprint_point_1 with object_coordinate and object_coordinate with footprint_point_2.
      *
      * @param layers A data structure containing a list of layers of a navigation environment.
      * @param reference_layer_name The name of layer, that is not modified and contains only information of the original
      * static map.
-     * @param alterable_layer_name The name of layer, that includes information about sign footprints.
-     * @param sign_coordinate The center coordinate of the sign.
+     * @param alterable_layer_name The name of layer, that includes information about object footprints.
+     * @param object_coordinate The center coordinate of the object.
      * @param edge_intersection_1 The coordinate of the intersection of the line with a layer edge.
      * @param edge_intersection_2 The coordinate of the intersection of the line with a layer edge.
-     * @param footprint_point_1 Ref to the first undefined coordinate, that describes an intersection point of a sign
+     * @param footprint_point_1 Ref to the first undefined coordinate, that describes an intersection point of a object
      * footprint with a nearest wall.
-     * @param footprint_point_2 Ref to the second undefined coordinate, that describes an intersection point of a sign
+     * @param footprint_point_2 Ref to the second undefined coordinate, that describes an intersection point of a object
      * footprint with a nearest wall.
      * @return
      */
-    void drawSignFootprintFromSignOriginToNearestWalls(grid_map::GridMap* layers, const std::string& reference_layer_name, const std::string& alterable_layer_name,
-                                                       grid_map::Position& sign_coordinate,
-                                                       grid_map::Position& edge_intersection_1, grid_map::Position& edge_intersection_2,
-                                                       grid_map::Position& footprint_point_1, grid_map::Position& footprint_point_2){
+    void drawObjectFootprintFromObjectOriginToNearestWalls(grid_map::GridMap* layers, const std::string& reference_layer_name, const std::string& alterable_layer_name,
+                                                           grid_map::Position& object_coordinate,
+                                                           grid_map::Position& edge_intersection_1, grid_map::Position& edge_intersection_2,
+                                                           grid_map::Position& footprint_point_1, grid_map::Position& footprint_point_2){
 
-        for (grid_map::LineIterator iterator(*layers, sign_coordinate, edge_intersection_1); !iterator.isPastEnd(); ++iterator) {
+        for (grid_map::LineIterator iterator(*layers, object_coordinate, edge_intersection_1); !iterator.isPastEnd(); ++iterator) {
             if(layers->at(reference_layer_name, *iterator) > 0.8){
                 break;
             }
             layers->getPosition(*iterator, footprint_point_1);
         }
-        for (grid_map::LineIterator iterator(*layers, sign_coordinate, edge_intersection_2); !iterator.isPastEnd(); ++iterator) {
+        for (grid_map::LineIterator iterator(*layers, object_coordinate, edge_intersection_2); !iterator.isPastEnd(); ++iterator) {
             if(layers->at(reference_layer_name, *iterator) > 0.8){
                 break;
             }
@@ -247,38 +247,38 @@ private:
         footprint_point_2.x() = roundToNearest(footprint_point_2.x(), 3);
         footprint_point_2.y() = roundToNearest(footprint_point_2.y(), 3);
 
-        drawLine(layers, alterable_layer_name, sign_coordinate, footprint_point_1);
-        drawLine(layers, alterable_layer_name, sign_coordinate, footprint_point_2);
-        drawPoint(layers, alterable_layer_name, sign_coordinate);
+        drawLine(layers, alterable_layer_name, object_coordinate, footprint_point_1);
+        drawLine(layers, alterable_layer_name, object_coordinate, footprint_point_2);
+        drawPoint(layers, alterable_layer_name, object_coordinate);
     }
 
     /**
-     * Method erases a sign footprint from the map based on 2 coordinates that describe this footprint.
+     * Method erases a object footprint from the map based on 2 coordinates that describe this footprint.
      *
      * @param layers A data structure containing a list of layers of a navigation environment.
-     * @param alterable_layer_name The name of layer, that includes information about sign footprints.
-     * @param sign_center The center coordinate of sign.
-     * @param footprint_point_1 The first coordinate that represents an intersection point of the sign footprint with
+     * @param alterable_layer_name The name of layer, that includes information about object footprints.
+     * @param object_center The center coordinate of object.
+     * @param footprint_point_1 The first coordinate that represents an intersection point of the object footprint with
      * a nearest wall.
-     * @param footprint_point_2 The second coordinate that represents an intersection point of the sign footprint with
+     * @param footprint_point_2 The second coordinate that represents an intersection point of the object footprint with
      * a nearest wall.
      * @return TRUE if a layer exists, or FALSE otherwise.
      */
-    bool eraseSignFootprint(grid_map::GridMap* layers, const std::string& alterable_layer_name,
-                            grid_map::Position& sign_center,
-                            grid_map::Position& footprint_point_1, grid_map::Position& footprint_point_2){
+    bool eraseObjectFootprint(grid_map::GridMap* layers, const std::string& alterable_layer_name,
+                              grid_map::Position& object_center,
+                              grid_map::Position& footprint_point_1, grid_map::Position& footprint_point_2){
         if (layers->exists(alterable_layer_name)){
-            eraseLine(layers, alterable_layer_name, sign_center, footprint_point_1);
-            eraseLine(layers, alterable_layer_name, sign_center, footprint_point_2);
-            erasePoint(layers, alterable_layer_name, sign_center);
+            eraseLine(layers, alterable_layer_name, object_center, footprint_point_1);
+            eraseLine(layers, alterable_layer_name, object_center, footprint_point_2);
+            erasePoint(layers, alterable_layer_name, object_center);
             return true;
         } else{
             return false;
         }
     }
 
-    std::string saveDataToDatabase(simulation::AddSignOnMapMsg::Request &request, simulation::AddSignOnMapMsg::Response &response){
-        MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
+    std::string saveDataToDatabase(simulation::AddObjectOnMapMsg::Request &request, simulation::AddObjectOnMapMsg::Response &response){
+        MessageStoreProxy messageStore(nhBase, str(node_constants::COLLECTION_NAME));
         DatabaseEntryInsert dbEntry;
         dbEntry.x_center = request.x_center;
         dbEntry.y_center = request.y_center;
@@ -291,33 +291,33 @@ private:
     }
 
     bool deleteDataFromDatabase(string const& entry_id){
-        MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
+        MessageStoreProxy messageStore(nhBase, str(node_constants::COLLECTION_NAME));
         return deleteEntry(messageStore, entry_id);
     }
 
     boost::shared_ptr<DatabaseEntryInsert> getDataByIdFromDatabase(string const& entry_id){
-        MessageStoreProxy messageStore(nh_base, str(node_constants::COLLECTION_NAME));
+        MessageStoreProxy messageStore(nhBase, str(node_constants::COLLECTION_NAME));
         return getEntryById(messageStore, entry_id);
     }
 
-    bool addSignOnMap(simulation::AddSignOnMapMsg::Request &request, simulation::AddSignOnMapMsg::Response &response){
-        grid_map::Position sign_center(request.x_center, request.y_center);
-        double sign_direction = getDegrees(request.dir_radians); // degrees
+    bool addObjectOnMap(simulation::AddObjectOnMapMsg::Request &request, simulation::AddObjectOnMapMsg::Response &response){
+        grid_map::Position object_center(request.x_center, request.y_center);
+        double object_direction = getDegrees(request.dir_radians); // degrees
         ROS_DEBUG("ME_1");
         grid_map::Position edge_intersection_1;
         grid_map::Position edge_intersection_2;
-        bool success_1 = findIntersectionPointWithLayerEdge(map, AUGMENTED_LAYER, sign_center, sign_direction, AZIMUTH, edge_intersection_1);
-        bool success_2 = findIntersectionPointWithLayerEdge(map, AUGMENTED_LAYER, sign_center, sign_direction, -AZIMUTH, edge_intersection_2);
+        bool success_1 = findIntersectionPointWithLayerEdge(map, AUGMENTED_LAYER, object_center, object_direction, AZIMUTH, edge_intersection_1);
+        bool success_2 = findIntersectionPointWithLayerEdge(map, AUGMENTED_LAYER, object_center, object_direction, -AZIMUTH, edge_intersection_2);
         ROS_DEBUG("ME_2");
         ROS_DEBUG_STREAM("" << success_1 << " " << success_2);
         if(success_1 && success_2) {
             grid_map::Position footprint_point_1;
             grid_map::Position footprint_point_2;
             ROS_DEBUG("ME_3");
-            drawSignFootprintFromSignOriginToNearestWalls(map, ORIGIN_LAYER, AUGMENTED_LAYER,
-                                                          sign_center,
-                                                          edge_intersection_1, edge_intersection_2,
-                                                          footprint_point_1, footprint_point_2);
+            drawObjectFootprintFromObjectOriginToNearestWalls(map, ORIGIN_LAYER, AUGMENTED_LAYER,
+                                                              object_center,
+                                                              edge_intersection_1, edge_intersection_2,
+                                                              footprint_point_1, footprint_point_2);
             ROS_DEBUG("ME_4");
             response.x1_intersection = footprint_point_1.x();
             response.y1_intersection = footprint_point_1.y();
@@ -332,7 +332,7 @@ private:
             nav_msgs::OccupancyGrid augmentedMapOccupancyGrid;
             grid_map::GridMapRosConverter::toOccupancyGrid(*map, AUGMENTED_LAYER,0.0, 1.0, augmentedMapOccupancyGrid);
 
-            pub_map.publish(augmentedMapOccupancyGrid);
+            pubMap.publish(augmentedMapOccupancyGrid);
             ROS_DEBUG("ME_6");
 
         }
@@ -340,14 +340,14 @@ private:
         return success_1 && success_2;
     }
 
-    bool removeSignFromMap(simulation::RemoveSignFromMapMsg::Request &request, simulation::RemoveSignFromMapMsg::Response &response){
+    bool removeObjectFromMap(simulation::RemoveObjectFromMapMsg::Request &request, simulation::RemoveObjectFromMapMsg::Response &response){
         boost::shared_ptr<DatabaseEntryInsert> dbEntry = getDataByIdFromDatabase(request.entry_id);
 
-        grid_map::Position sign_center(dbEntry->x_center, dbEntry->y_center);
+        grid_map::Position object_center(dbEntry->x_center, dbEntry->y_center);
         grid_map::Position footprint_point_1(dbEntry->x1_intersection, dbEntry->y1_intersection);
         grid_map::Position footprint_point_2(dbEntry->x2_intersection, dbEntry->y2_intersection);
 
-        bool success = eraseSignFootprint(map, AUGMENTED_LAYER, sign_center, footprint_point_1, footprint_point_2);
+        bool success = eraseObjectFootprint(map, AUGMENTED_LAYER, object_center, footprint_point_1, footprint_point_2);
 
         response.success = success;
         if(success){
@@ -359,7 +359,7 @@ private:
             nav_msgs::OccupancyGrid augmentedMapOG;
             grid_map::GridMapRosConverter::toOccupancyGrid(*map, AUGMENTED_LAYER,0.0, 1.0, augmentedMapOG);
 
-            pub_map.publish(augmentedMapOG);
+            pubMap.publish(augmentedMapOG);
         }
         return success;
     }

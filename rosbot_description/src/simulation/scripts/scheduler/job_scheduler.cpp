@@ -24,11 +24,11 @@ class JobScheduler{
 
 private:
     MessageStoreProxy messageStore;
-    ros::ServiceServer srv_schedule_job;
+    ros::ServiceServer srvScheduleJob;
 
 public:
-    JobScheduler(ros::NodeHandle& nh_base) : messageStore(nh_base, str(node_constants::COLLECTION_NAME)){
-        srv_schedule_job = nh_base.advertiseService(str(node_constants::ADV_JOB_SCHEDULER), &JobScheduler::callback, this);
+    JobScheduler(ros::NodeHandle& nhBase): messageStore(nhBase, str(node_constants::COLLECTION_NAME)){
+        srvScheduleJob = nhBase.advertiseService(str(node_constants::ADV_JOB_SCHEDULER), &JobScheduler::jobSchedulerCallback, this);
         ROS_INFO("Scheduler service is up.");
     };
 
@@ -36,14 +36,15 @@ public:
         ROS_INFO("Scheduler service is destroyed.");
     };
 
-    bool callback(ScheduleJobMsg::Request& request, ScheduleJobMsg::Response& response){
+private:
+    bool jobSchedulerCallback(ScheduleJobMsg::Request& request, ScheduleJobMsg::Response& response){
         bool success = false;
 
         ROS_DEBUG("JC_1");
         DatabaseEntryUpdate dbEntry;
-        dbEntry.sign_id = request.sign_id;
+        dbEntry.object_id = request.object_id;
         dbEntry.time_start = getCurrentDatetimeInSeconds();                                                // time in seconds since Unix epoch
-        dbEntry.time_end = calculateUpperTimeOfSignValidity(request.sign_id, dbEntry.time_start);   // time in seconds since Unix epoch
+        dbEntry.time_end = calculateUpperTimeOfObjectValidity(request.object_id, dbEntry.time_start);   // time in seconds since Unix epoch
 
         ROS_DEBUG("JC_2");
         JobBriefInfo jobInfo;
@@ -63,18 +64,16 @@ public:
         return success;
     }
 
-private:
-    long calculateUpperTimeOfSignValidity(long& sign_id, long& sign_time_start){
-        long current = getCurrentDatetimeInSeconds();
-        switch(sign_id) {
+    long calculateUpperTimeOfObjectValidity(long objectId, long objectStartTime){
+        switch(objectId) {
             case obstacle_constants::STOP_SIGN_ID:
-                return current + obstacle_constants::STOP_SIGN_LIFESPAN;
+                return objectStartTime + obstacle_constants::STOP_SIGN_LIFESPAN;
             case obstacle_constants::BLOCK_SIGN_ID:
-                return current + obstacle_constants::BLOCK_SIGN_LIFESPAN;
+                return objectStartTime + obstacle_constants::BLOCK_SIGN_LIFESPAN;
             case obstacle_constants::CLOSED_SIGN_ID:
-                return current + obstacle_constants::CLOSED_SIGN_ID;
+                return objectStartTime + obstacle_constants::CLOSED_SIGN_ID;
             default:
-                return current + obstacle_constants::STOP_SIGN_LIFESPAN;
+                return objectStartTime + obstacle_constants::STOP_SIGN_LIFESPAN;
         }
     }
 
