@@ -14,11 +14,11 @@ obstacles_layer:
   obstacle_range: 6.0
   raytrace_range: 8.5
   observation_sources: laser_scan_sensor
-  laser_scan_sensor: {topic: /scan,
-                      sensor_frame: /laser,
-                      data_type: LaserScan,
-                      clearing: true,
-                      marking: true}
+  laser_scan_sensor: { topic: /scan,
+                       sensor_frame: /laser,
+                       data_type: LaserScan,
+                       clearing: true,
+                       marking: true }
 
 inflation_layer:
   enabled: true
