@@ -3,12 +3,22 @@
 
     <arg name="include_signs" default="false"/>
 
-    <include file="$(find rosbot_description)/launch/rosbot_gazebo.launch"></include>
+    <include file="$(find rosbot_description)/launch/rosbot_gazebo.launch">
+        <arg name="x" value="-5.5"/>
+        <arg name="y" value="3.5"/>
+    </include>
 
-    <include unless="$(arg include_signs)" file="$(find rosbot_gazebo)/launch/maze_world.launch"></include>
+    <include unless="$(arg include_signs)" file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find simulation)/worlds/sim_env_without_obstacles.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
 
     <include if="$(arg include_signs)" file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find simulation)/worlds/maze_with_signs.world"/>
+        <arg name="world_name" value="$(find simulation)/worlds/sim_env_with_obstacles.world"/>
         <arg name="paused" value="false"/>
         <arg name="use_sim_time" value="true"/>
         <arg name="gui" value="true"/>

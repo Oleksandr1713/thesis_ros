@@ -8,7 +8,7 @@
 <!--    <include file="$(find mongodb_store)/launch/mongodb_store.launch"/>-->
 
     <!-- Map server -->
-    <arg name="map_file" default="$(find simulation)/maps/maze.yaml"/>
+    <arg name="map_file" default="$(find simulation)/maps/reference_map.yaml"/>
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
 
     <!-- Map enrichment -->
@@ -36,13 +36,12 @@
         <rosparam file="$(find rosbot_navigation)/config/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find rosbot_navigation)/config/global_costmap_params.yaml" command="load" />
         <rosparam file="$(find rosbot_navigation)/config/move_base_params.yaml" command="load" />
-        <rosparam file="$(find rosbot_navigation)/config/trajectory_planner.yaml" command="load" />
+        <rosparam file="$(find rosbot_navigation)/config/local_planner.yaml" command="load" />
 
         <remap from="cmd_vel" to="cmd_vel"/>
         <remap from="odom" to="odom"/>
         <remap from="scan" to="/scan"/>
         <remap from="map" to="/simulation/augmented_map"/>
-<!--        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />-->
     </node>
 
     <!--&lt;!&ndash; Image recognition &ndash;&gt;
