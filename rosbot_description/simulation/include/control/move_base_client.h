@@ -59,6 +59,7 @@ public:
         goal.target_pose.header.frame_id = "map";
         goal.target_pose.header.stamp = ros::Time::now();
         goal.target_pose.pose = refPtrMsg.operator*();
+
         ROS_INFO("Sending goal");
         ac.sendGoal(goal,
                     boost::bind(&MoveBaseClient::doneCallback, this, _1, _2),
