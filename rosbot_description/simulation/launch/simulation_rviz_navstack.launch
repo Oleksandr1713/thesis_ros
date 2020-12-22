@@ -44,28 +44,28 @@
         <remap from="map" to="/simulation/augmented_map"/>
     </node>
 
-    <!--&lt;!&ndash; Image recognition &ndash;&gt;
-    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
-        <param name="gui" value="false"/>
-        <param name="subscribe_depth" value="true"/>
-        <param name="objects_path" value="$(find simulation)/image_rec/"/>
+<!--     &lt;!&ndash; Image recognition &ndash;&gt; -->
+<!--    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">-->
+<!--        <param name="gui" value="false"/>-->
+<!--        <param name="subscribe_depth" value="true"/>-->
+<!--        <param name="objects_path" value="$(find simulation)/image_rec/"/>-->
 
-        <remap from="image" to="/camera/rgb/image_raw"/>
-        <remap from="rgb/image_rect_color" to="/camera/rgb/image_raw"/>
-        <remap from="depth_registered/image_raw" to="/camera/depth/image_raw"/>
-        <remap from="depth_registered/camera_info" to="/camera/depth/camera_info"/>
-    </node>
+<!--        <remap from="image" to="/camera/rgb/image_raw"/>-->
+<!--        <remap from="rgb/image_rect_color" to="/camera/rgb/image_raw"/>-->
+<!--        <remap from="depth_registered/image_raw" to="/camera/depth/image_raw"/>-->
+<!--        <remap from="depth_registered/camera_info" to="/camera/depth/camera_info"/>-->
+<!--    </node>-->
 
-    &lt;!&ndash; Obstacle detection and its position calculation &ndash;&gt;
-    <node name="obstacle_dpc" pkg="simulation" type="obstacle_dpc_node" output="screen"/>
+<!--     &lt;!&ndash; Obstacle detection and its position calculation &ndash;&gt; -->
+<!--    <node name="obstacle_dpc" pkg="simulation" type="obstacle_dpc_node" output="screen"/>-->
 
-    &lt;!&ndash; Job scheduler &ndash;&gt;
-    <node name="job_scheduler" pkg="simulation" type="job_scheduler_node" output="screen"/>
+<!--     &lt;!&ndash; Job scheduler &ndash;&gt; -->
+<!--    <node name="job_scheduler" pkg="simulation" type="job_scheduler_node" output="screen"/>-->
 
-    &lt;!&ndash; Job catcher &ndash;&gt;
-    <node name="job_catcher" pkg="simulation" type="job_catcher_node" output="screen"/>-->
+<!--     &lt;!&ndash; Job catcher &ndash;&gt;-->
+<!--    <node name="job_catcher" pkg="simulation" type="job_catcher_node" output="screen"/>-->
 
-    <!-- Show in Rviz   -->
+    <!-- Show in Rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>
 
 </launch>

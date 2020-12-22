@@ -33,6 +33,7 @@
 
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
   <depend>mongodb_store</depend>
   <depend>qtbase5-dev</depend>
   <depend>tf</depend>

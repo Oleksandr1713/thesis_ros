@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
         roscpp
         mongodb_store
         std_msgs
+        std_srvs
         message_generation
         grid_map_core
         grid_map_msgs
@@ -49,6 +50,7 @@ find_package(Qt5 COMPONENTS Quick Core REQUIRED)
  generate_messages(
    DEPENDENCIES
    std_msgs
+   std_srvs
  )
 
 ###################################
@@ -71,6 +73,7 @@ catkin_package(
         grid_map_msgs
         grid_map_ros
         nav_msgs
+        std_srvs
         move_base_msgs
         actionlib
         tf

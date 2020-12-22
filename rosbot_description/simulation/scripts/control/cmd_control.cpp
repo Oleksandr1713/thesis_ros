@@ -2,6 +2,7 @@
 #include <tf/transform_broadcaster.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <std_msgs/Empty.h>
+#include <std_srvs/Empty.h>
 #include "simulation/DestinationPose.h"
 #include "control/move_base_client.h"
 #include "my_lib/auxiliary_func.h"
@@ -18,6 +19,7 @@ private:
     std::unique_ptr<MoveBaseClient> mbc;
 
     ros::Publisher pubGarbageCollector;
+    ros::ServiceClient clientResetCostmap;
     ros::Subscriber subGarbageCollector;
     ros::Subscriber subGoTo;
     ros::Subscriber subCancelGoal;
@@ -30,6 +32,8 @@ public:
         ros::NodeHandle nhBase;
         pubGarbageCollector = nhBase.advertise<std_msgs::Empty>(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, false);
         subGarbageCollector = nhBase.subscribe(str(node_constants::TOPIC_GARBAGE_COLLECTOR), 1, &CommandLineControl::resetUniquePtrCallback, this);
+
+        clientResetCostmap = nhBase.serviceClient<std_srvs::Empty>(str(node_constants::REQ_CLEAR_COSTMAP));
 
         subGoTo = nhBase.subscribe(str(node_constants::TOPIC_GO_TO), 1, &CommandLineControl::goToCallback, this);
         subCancelGoal = nhBase.subscribe(str(node_constants::TOPIC_CANCEL_GOAL), 1, &CommandLineControl::cancelGoalCallback, this);
@@ -77,6 +81,8 @@ private:
                 goal->orientation.y = agv_orientation.y();
                 goal->orientation.z = agv_orientation.z();
                 goal->orientation.w = agv_orientation.w();
+
+                resetCostmapToDefault();    // before starting to follow the goal, a global costmap must be equal to its primary state (reference map)
                 mbc->goTo(goal);
             }
         }
@@ -128,6 +134,18 @@ private:
             ROS_WARN("Nothing to re-plan!");
         }
     }
+
+    bool resetCostmapToDefault(){
+        std_srvs::Empty empty;
+        if (clientResetCostmap.call(empty)){
+            ROS_INFO("Resetting of global costmap was SUCCESSFUL!");
+            return true;
+        } else {
+            ROS_ERROR("Reset of global costmap FAILED!");
+            return false;
+        }
+    }
+
 };
 
 int main(int argc, char** argv){
