@@ -92,8 +92,6 @@ private:
         if(mbc != nullptr){
             mbc->cancelGoal();
             ROS_INFO("Goal has been canceled!");
-            ROS_INFO("Status of the goal: %s", mbc->getCurrentActionLibGoalState().toString().c_str());
-            resetUniquePtrCallback(std_msgs::Empty());
         } else {
             ROS_WARN("Nothing to cancel!");
         }
