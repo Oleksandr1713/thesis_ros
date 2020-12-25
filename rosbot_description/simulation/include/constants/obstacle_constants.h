@@ -3,8 +3,8 @@
 
 namespace obstacle_constants {
 
-    static int const STOP_SIGN_ID = 1; // this id matches the id obtained using find_object_2d package during image recognition training
-    static long const STOP_SIGN_LIFESPAN = 180; // seconds
+    static int const STOP_SIGN_ID = 8; // this id matches the id obtained using find_object_2d package during image recognition training
+    static long const STOP_SIGN_LIFESPAN = 1800; // seconds
 
     static int const BLOCK_SIGN_ID = 2;
     static long const BLOCK_SIGN_LIFESPAN = 300; // seconds
