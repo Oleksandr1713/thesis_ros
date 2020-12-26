@@ -90,8 +90,8 @@ private:
 
     void cancelGoalCallback(std_msgs::Empty msg){
         if(mbc != nullptr){
+            ROS_INFO("Goal cancellation...");
             mbc->cancelGoal();
-            ROS_INFO("Goal has been canceled!");
         } else {
             ROS_WARN("Nothing to cancel!");
         }
@@ -99,8 +99,8 @@ private:
 
     void pauseGoalCallback(std_msgs::Empty msg){
         if(mbc != nullptr){
+            ROS_INFO("Goal suspension...");
             mbc->pauseGoal();
-            ROS_INFO("Goal has been paused!");
         } else {
             ROS_WARN("Nothing to pause!");
         }
@@ -108,8 +108,8 @@ private:
 
     void resumeGoalCallback(std_msgs::Empty msg){
         if(mbc != nullptr && mbc->getCurrentSelfGoalState() == MoveBaseClient::PAUSED){
+            ROS_INFO("Goal resuming...");
             mbc->resumeGoal();
-            ROS_INFO("Goal has been resumed!");
         } else {
             ROS_WARN("Nothing to resume!");
         }
@@ -118,16 +118,8 @@ private:
     void replanPathCallback(std_msgs::Empty msg){
         if(mbc != nullptr && mbc->getCurrentSelfGoalState() == MoveBaseClient::PAUSED){
             ROS_INFO("Path re-planning has been started...");
-
-            ros::Duration(node_constants::DELAY).sleep();   // this line gives some delay to ensure that the static map update has occurred and is ready to be used
-
-            boost::shared_ptr<geometry_msgs::Pose> source = mbc->getPSource();
-            boost::shared_ptr<geometry_msgs::Pose> destination = mbc->getPDestination();
-
-            resetUniquePtrCallback(std_msgs::Empty());
-            mbc = std::unique_ptr<MoveBaseClient>(new MoveBaseClient(pubGarbageCollector));
-            mbc->setPSource(source);
-            mbc->goTo(destination);
+            resetCostmapToDefault();
+            mbc->resumeGoal();
         } else {
             ROS_WARN("Nothing to re-plan!");
         }
@@ -135,13 +127,14 @@ private:
 
     bool resetCostmapToDefault(){
         std_srvs::Empty empty;
-        if (clientResetCostmap.call(empty)){
+        bool success = clientResetCostmap.call(empty);
+        if(success){
             ROS_INFO("Resetting of global costmap was SUCCESSFUL!");
-            return true;
         } else {
             ROS_ERROR("Reset of global costmap FAILED!");
-            return false;
         }
+        ros::Duration(node_constants::DELAY).sleep();
+        return success;
     }
 
 };
