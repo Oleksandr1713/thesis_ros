@@ -15,8 +15,7 @@ int main(int argc, char * argv[]) {
     ros::init(argc, argv, "example");
     ros::NodeHandle nh;
 
-    string collectionName = "ros_sign_info";
-    MessageStoreProxy messageStore(nh, collectionName);
+    MessageStoreProxy messageStore(nh, COLLECTION_NAME);
     DatabaseEntry dbEntry;
     dbEntry.x_coordinate = 10;
     dbEntry.job_id = 777;
