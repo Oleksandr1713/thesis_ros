@@ -8,6 +8,7 @@
 #include "mongodb_store_msgs/MongoUpdateMsg.h"
 #include "mongodb_store_msgs/MongoQueryMsg.h"
 #include "mongodb_store_msgs/MongoDeleteMsg.h"
+#include "mongodb_store_msgs/MongoDropCollectionMsg.h"
 #include "mongodb_store_msgs/MongoQuerywithProjectionMsg.h"
 #include "mongodb_store_msgs/StringPair.h"
 #include "mongodb_store_msgs/SerialisedMessage.h"
@@ -96,6 +97,7 @@ Populates a SerialisedMessage using the given instance of MsgType
                 m_queryClient(handle.serviceClient<mongodb_store_msgs::MongoQueryMsg>(_servicePrefix + "/query_messages")),
                 m_querywithProjectionClient(handle.serviceClient<mongodb_store_msgs::MongoQuerywithProjectionMsg>(_servicePrefix + "/query_with_projection_messages")),
                 m_deleteClient(handle.serviceClient<mongodb_store_msgs::MongoDeleteMsg>(_servicePrefix + "/delete")),
+                m_dropCollectionClient(handle.serviceClient<mongodb_store_msgs::MongoDropCollectionMsg>(_servicePrefix + "/drop_collection")),
                 m_insertPub(handle.advertise<mongodb_store_msgs::Insert>(_servicePrefix + "/insert", 100)),
                 m_database(_database),
                 m_collection(_collection) {
@@ -105,6 +107,7 @@ Populates a SerialisedMessage using the given instance of MsgType
             m_queryClient.waitForExistence();
             m_querywithProjectionClient.waitForExistence();
             m_deleteClient.waitForExistence();
+            m_dropCollectionClient.waitForExistence();
         }
 
         MessageStoreProxy(const MessageStoreProxy &_rhs) :
@@ -115,6 +118,7 @@ Populates a SerialisedMessage using the given instance of MsgType
                 m_queryClient(_rhs.m_queryClient),
                 m_querywithProjectionClient(_rhs.m_querywithProjectionClient),
                 m_deleteClient(_rhs.m_deleteClient),
+                m_dropCollectionClient(_rhs.m_dropCollectionClient),
                 m_insertPub(_rhs.m_insertPub) {}
 
 
@@ -124,6 +128,7 @@ Populates a SerialisedMessage using the given instance of MsgType
             m_queryClient.shutdown();
             m_querywithProjectionClient.shutdown();
             m_deleteClient.shutdown();
+            m_dropCollectionClient.shutdown();
             m_insertPub.shutdown();
         }
 
@@ -511,6 +516,17 @@ Populates a SerialisedMessage using the given instance of MsgType
             return srv.response.success;
         }
 
+        bool dropCollection() {
+
+            //Create empty request message with basic fields
+            mongodb_store_msgs::MongoDropCollectionMsg msg;
+            msg.request.database = m_database;
+            msg.request.collection = m_collection;
+            //sent data over
+            m_dropCollectionClient.call(msg);
+            return msg.response.success;
+        }
+
         uint32_t getNumInsertSubscribers() const {
             return m_insertPub.getNumSubscribers();
         }
@@ -525,6 +541,7 @@ Populates a SerialisedMessage using the given instance of MsgType
         ros::ServiceClient m_queryClient;
         ros::ServiceClient m_querywithProjectionClient;
         ros::ServiceClient m_deleteClient;
+        ros::ServiceClient m_dropCollectionClient;
         ros::Publisher m_insertPub;
 
         //an empty bson doc to save recreating one whenever one is not required

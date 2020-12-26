@@ -4,32 +4,33 @@ project(mongodb_store_msgs)
 find_package(catkin REQUIRED COMPONENTS message_generation actionlib actionlib_msgs)
 
 add_message_files(
-  FILES
-  StringList.msg
-  StringPair.msg
-  StringPairList.msg
-  SerialisedMessage.msg
-  Insert.msg
+        FILES
+        StringList.msg
+        StringPair.msg
+        StringPairList.msg
+        SerialisedMessage.msg
+        Insert.msg
 )
 
 add_service_files(
-  FILES
-  MongoInsertMsg.srv
-  MongoUpdateMsg.srv
-  MongoQueryMsg.srv
-  MongoQuerywithProjectionMsg.srv
-  MongoDeleteMsg.srv
+        FILES
+        MongoInsertMsg.srv
+        MongoUpdateMsg.srv
+        MongoQueryMsg.srv
+        MongoQuerywithProjectionMsg.srv
+        MongoDeleteMsg.srv
+        MongoDropCollectionMsg.srv
 )
 
 add_action_files(
-  FILES
-  MoveEntries.action
+        FILES
+        MoveEntries.action
 )
 
 
 generate_messages(DEPENDENCIES actionlib_msgs)
 
 catkin_package(
- CATKIN_DEPENDS message_generation
+        CATKIN_DEPENDS message_generation
 )
 

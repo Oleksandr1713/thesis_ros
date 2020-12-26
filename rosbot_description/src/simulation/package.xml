@@ -28,8 +28,12 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
+  <depend>mongodb_store</depend>
   <depend>qtbase5-dev</depend>
   <depend>tf</depend>
   <depend>cv_bridge</depend>

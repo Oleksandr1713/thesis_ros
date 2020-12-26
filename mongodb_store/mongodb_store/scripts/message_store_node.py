@@ -13,11 +13,10 @@ import pymongo
 from pymongo import GEO2D
 import json
 from bson import json_util
-from mongodb_store_msgs.msg import  StringPair, StringPairList, Insert
+from mongodb_store_msgs.msg import StringPair, StringPairList, Insert
 from bson.objectid import ObjectId
 from datetime import *
 from tf2_msgs.msg import TFMessage
-
 
 MongoClient = dc_util.import_MongoClient()
 
@@ -52,7 +51,7 @@ class MessageStore(object):
 
         self.keep_trash = rospy.get_param('mongodb_keep_trash', True)
 
-        self._mongo_client=MongoClient(db_host, db_port)
+        self._mongo_client = MongoClient(db_host, db_port)
 
         self.replicate_on_write = rospy.get_param(
             "mongodb_replicate_on_write", replicate_on_write)
@@ -69,19 +68,18 @@ class MessageStore(object):
                     self.extra_clients.append(MongoClient(extra[0], extra[1]))
                 except pymongo.errors.ConnectionFailure, e:
                     rospy.logwarn('Could not connect to extra datacentre at %s:%s' % (extra[0], extra[1]))
-            rospy.loginfo('Replicating content to a futher %s datacentres',len(self.extra_clients))
+            rospy.loginfo('Replicating content to a futher %s datacentres', len(self.extra_clients))
 
         # advertise ros services
         for attr in dir(self):
             if attr.endswith("_ros_srv"):
-                service=getattr(self, attr)
-                rospy.Service("/message_store/"+attr[:-8], service.type, service)
+                service = getattr(self, attr)
+                rospy.Service("/message_store/" + attr[:-8], service.type, service)
 
         self.queue_size = rospy.get_param("queue_size", 100)
         self.sub_insert = rospy.Subscriber("/message_store/insert", Insert,
                                            self.insert_ros_msg,
                                            queue_size=self.queue_size)
-
 
     def insert_ros_msg(self, msg):
         """
@@ -89,7 +87,6 @@ class MessageStore(object):
         """
         # actually procedure is the same
         self.insert_ros_srv(msg)
-
 
     def insert_ros_srv(self, req):
         """
@@ -102,20 +99,19 @@ class MessageStore(object):
         # get requested collection from the db, creating if necessary
         collection = self._mongo_client[req.database][req.collection]
 
-        #check if the object has the location attribute
+        # check if the object has the location attribute
         if hasattr(obj, 'pose'):
             # if it does create a location index
             collection.create_index([("loc", pymongo.GEO2D)])
-            #check if the object has the location attribute
+            # check if the object has the location attribute
             if hasattr(obj, 'geotype'):
-            # if it does create a location index
-            collection.create_index([("geoloc", pymongo.GEOSPHERE)])
+                # if it does create a location index
+                collection.create_index([("geoloc", pymongo.GEOSPHERE)])
 
-        #check if the object has the timestamp attribute TODO ?? really necessary
-        #if hasattr(obj, 'logtimestamp'):
+        # check if the object has the timestamp attribute TODO ?? really necessary
+        # if hasattr(obj, 'logtimestamp'):
         # if it does create a location index
         #  collection.create_index([("datetime", pymongo.GEO2D)])
-
 
         # try:
         stamp = rospy.get_rostime()
@@ -135,7 +131,6 @@ class MessageStore(object):
 
         obj_id = dc_util.store_message(collection, obj, meta)
 
-
         if self.replicate_on_write:
             # also do insert to extra datacentres, making sure object ids are consistent
             for extra_client in self.extra_clients:
@@ -146,7 +141,7 @@ class MessageStore(object):
         # except Exception, e:
         # print e
 
-    insert_ros_srv.type=dc_srv.MongoInsertMsg
+    insert_ros_srv.type = dc_srv.MongoInsertMsg
 
     def delete_ros_srv(self, req):
         """
@@ -168,7 +163,6 @@ class MessageStore(object):
             bk_collection = self._mongo_client[req.database][req.collection + "_Trash"]
             bk_collection.save(message)
 
-
             # also repeat in extras
             if self.replicate_on_write:
                 for extra_client in self.extra_clients:
@@ -178,8 +172,19 @@ class MessageStore(object):
                     extra_bk_collection.save(message)
 
         return True
-    delete_ros_srv.type=dc_srv.MongoDeleteMsg
 
+    delete_ros_srv.type = dc_srv.MongoDeleteMsg
+
+    def drop_collection_ros_srv(self, req):
+        """
+        Drop a collection from the database
+        """
+        # Get the collection
+        collection = self._mongo_client[req.database][req.collection]
+        collection.drop()
+        return True
+
+    drop_collection_ros_srv.type = dc_srv.MongoDropCollectionMsg
 
     def update_ros_srv(self, req):
         """
@@ -214,8 +219,8 @@ class MessageStore(object):
                 dc_util.update_message(extra_collection, obj_query, obj, meta, req.upsert)
 
         return str(obj_id), altered
-    update_ros_srv.type=dc_srv.MongoUpdateMsg
 
+    update_ros_srv.type = dc_srv.MongoUpdateMsg
 
     def to_query_dict(self, message_query, meta_query):
         """
@@ -227,7 +232,6 @@ class MessageStore(object):
             obj_query["_meta." + k] = v
 
         return obj_query
-
 
     def query_messages_ros_srv(self, req):
         """
@@ -248,30 +252,29 @@ class MessageStore(object):
         # this is a list of entries in dict format including meta
         sort_query_dict = dc_util.string_pair_list_to_dictionary(req.sort_query)
         sort_query_tuples = []
-        for k,v in sort_query_dict.iteritems():
+        for k, v in sort_query_dict.iteritems():
             try:
                 sort_query_tuples.append((k, int(v)))
             except ValueError:
-                sort_query_tuples.append((k,v))
+                sort_query_tuples.append((k, v))
                 # this is a list of entries in dict format including meta
 
         projection_query_dict = dc_util.string_pair_list_to_dictionary(req.projection_query)
-        projection_meta_dict  = dict()
+        projection_meta_dict = dict()
         projection_meta_dict["_meta"] = 1
 
-        entries =  dc_util.query_message(
+        entries = dc_util.query_message(
             collection, obj_query, sort_query_tuples, projection_query_dict, req.single, req.limit)
         if projection_query_dict:
             meta_entries = dc_util.query_message(
                 collection, obj_query, sort_query_tuples, projection_meta_dict, req.single, req.limit)
-
 
         # keep trying clients until we find an answer
         if self.replicate_on_write:
             for extra_client in self.extra_clients:
                 if len(entries) == 0:
                     extra_collection = extra_client[req.database][req.collection]
-                    entries =  dc_util.query_message(
+                    entries = dc_util.query_message(
                         extra_collection, obj_query, sort_query_tuples, projection_query_dict, req.single, req.limit)
                     if projection_query_dict:
                         meta_entries = dc_util.query_message(
@@ -292,18 +295,19 @@ class MessageStore(object):
             # instantiate the ROS message object from the dictionary retrieved from the db
             message = dc_util.dictionary_to_message(entry, cls)
             # the serialise this object in order to be sent in a generic form
-            serialised_messages = serialised_messages + (dc_util.serialise_message(message), )
+            serialised_messages = serialised_messages + (dc_util.serialise_message(message),)
             # add ObjectID into meta as it might be useful later
             if projection_query_dict:
                 entry["_meta"]["_id"] = meta_entries[idx]["_id"]
             else:
                 entry["_meta"]["_id"] = entry["_id"]
             # serialise meta
-            metas = metas + (StringPairList([StringPair(dc_srv.MongoQueryMsgRequest.JSON_QUERY, json.dumps(entry["_meta"], default=json_util.default))]), )
+            metas = metas + (StringPairList([StringPair(dc_srv.MongoQueryMsgRequest.JSON_QUERY,
+                                                        json.dumps(entry["_meta"], default=json_util.default))]),)
 
         return [serialised_messages, metas]
 
-    query_messages_ros_srv.type=dc_srv.MongoQueryMsg
+    query_messages_ros_srv.type = dc_srv.MongoQueryMsg
 
     def query_with_projection_messages_ros_srv(self, req):
         """
@@ -311,7 +315,7 @@ class MessageStore(object):
         """
         return self.query_messages_ros_srv(req)
 
-    query_with_projection_messages_ros_srv.type=dc_srv.MongoQuerywithProjectionMsg
+    query_with_projection_messages_ros_srv.type = dc_srv.MongoQuerywithProjectionMsg
 
 
 if __name__ == '__main__':
