@@ -46,24 +46,8 @@ public:
         ROS_INFO("Client object has been destroyed");
     }
 
-    const boost::shared_ptr<geometry_msgs::Pose> &getPSource() const {
-        return pSource;
-    }
-
-    void setPSource(const boost::shared_ptr<geometry_msgs::Pose> &pSource) {
-        MoveBaseClient::pSource = pSource;
-    }
-
-    const boost::shared_ptr<geometry_msgs::Pose> &getPDestination() const {
-        return pDestination;
-    }
-
-    void setPDestination(const boost::shared_ptr<geometry_msgs::Pose> &pDestination) {
-        MoveBaseClient::pDestination = pDestination;
-    }
-
     void goTo(boost::shared_ptr<geometry_msgs::Pose>& refPtrMsg){
-        setPDestination(refPtrMsg);
+        MoveBaseClient::pDestination = refPtrMsg;
         move_base_msgs::MoveBaseGoal goal;
         goal.target_pose.header.frame_id = "map";
         goal.target_pose.header.stamp = ros::Time::now();
@@ -112,15 +96,21 @@ public:
                       const move_base_msgs::MoveBaseResultConstPtr& result){
         ROS_INFO("Finished in state [%s] & [%s]", state.toString().c_str(), toStringCurrentSelfGoalState().c_str());
         if(state == actionlib::SimpleClientGoalState::SUCCEEDED && goalState == ACTIVE){
+            ROS_INFO("Goal completed!");
             goalState = COMPLETED;
             endSimTime = ros::Time::now();
             endWallTime = ros::WallTime::now();
             requestSelfDestruction();
-        } else if(state == actionlib::SimpleClientGoalState::PREEMPTED && goalState == ACTIVE){
-            goalState = CANCELED;
-            endSimTime = ros::Time::now();
-            endWallTime = ros::WallTime::now();
-            requestSelfDestruction();
+        } else if(state == actionlib::SimpleClientGoalState::PREEMPTED){
+            if (goalState == ACTIVE){
+                ROS_INFO("Goal canceled!");
+                goalState = CANCELED;
+                endSimTime = ros::Time::now();
+                endWallTime = ros::WallTime::now();
+                requestSelfDestruction();
+            } else if(goalState == PAUSED){
+                ROS_INFO("Goal paused!");
+            }
         } else if(state == actionlib::SimpleClientGoalState::ABORTED){
             /*
              * This case happens when an assigned destination coordinate is outside the navigation map.
@@ -159,15 +149,18 @@ public:
     }
 
     void cancelGoal(){
-        ac.cancelGoal();
+        ROS_INFO("Cancel request");
+        ac.cancelAllGoals();
     }
 
     void pauseGoal(){
+        ROS_INFO("Pause request");
         goalState = PAUSED;
-        ac.cancelGoal();
+        ac.cancelAllGoals();
     }
 
     void resumeGoal(){
+        ROS_INFO("Resume request");
         goTo(pDestination);
     }
 

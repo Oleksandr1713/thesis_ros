@@ -27,8 +27,8 @@ namespace node_constants {
     /* Service names */
     constexpr static const char *REQ_CLEAR_COSTMAP = "/move_base/clear_costmaps";  // service name, which can be requested to reset a global costmap to the default state
 
-    /* Delay in seconds before starting path re-planning */
-    static const double DELAY = 2.0;    // it`s needed to ensure that the static map has been updated and the node can use its updated version
+    /* Delay in seconds to distribute the default cost map to interested nodes */
+    static const double DELAY = 2.0;
 
     /* Orientation of AGV head at the destination point */
     static const double EAST = 0;       // degrees
