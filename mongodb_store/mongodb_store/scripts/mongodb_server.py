@@ -108,10 +108,10 @@ class MongoServer(object):
         # Blocker to prevent Ctrl-C being passed to the mongo server
         def block_mongo_kill():
             os.setpgrp()
-#            signal.signal(signal.SIGINT, signal.SIG_IGN)
+        #            signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-        #cmd = ["mongod","--dbpath",self._db_path,"--port",str(self._mongo_port),"--smallfiles","--bind_ip","127.0.0.1"]
-        cmd = ["mongod","--dbpath",self._db_path,"--port",str(self._mongo_port),"--smallfiles"]
+        #cmd = ["mongod","--dbpath",self._db_path,"--port",str(self._mongo_port),"--bind_ip","127.0.0.1"]
+        cmd = ["mongod","--dbpath",self._db_path,"--port",str(self._mongo_port)]
 
         if self.bind_to_host:
             cmd.append("--bind_ip")
@@ -121,8 +121,8 @@ class MongoServer(object):
             cmd.append("--replSet")
             cmd.append(self.repl_set)
         self._mongo_process = subprocess.Popen(cmd,
-                                         stdout=subprocess.PIPE,
-                                         preexec_fn = block_mongo_kill)
+                                               stdout=subprocess.PIPE,
+                                               preexec_fn = block_mongo_kill)
 
         while self._mongo_process.poll() is None:# and not rospy.is_shutdown():
             try:

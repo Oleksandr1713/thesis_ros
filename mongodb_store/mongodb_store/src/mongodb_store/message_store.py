@@ -22,7 +22,7 @@ class MessageStoreProxy:
 	>>> msg_store = MessageStoreProxy()
 	>>> p = Pose(Point(0, 1, 2), Quaternion(0, 0, 0 , 1))
 	>>> msg_store.insert_named("my favourite pose", p)
-        >>> retrieved = msg_store.query_named("my favourite pose", Pose._type)
+    >>> retrieved = msg_store.query_named("my favourite pose", Pose._type)
 
 	For usage examples, please see `example_message_store_client.py` within the scripts
 	folder of mongodb_store.
@@ -43,21 +43,21 @@ class MessageStoreProxy:
 		update_service = service_prefix + '/update'
 		delete_service = service_prefix + '/delete'
 		query_service = service_prefix + '/query_messages'
-                # try and get the mongo service, block until available
-                found_services_first_try = True # if found straight away
-                while not rospy.is_shutdown():
-                        try:
-                                rospy.wait_for_service(insert_service,5)
-                                rospy.wait_for_service(update_service,5)
-                                rospy.wait_for_service(query_service,5)
-                                rospy.wait_for_service(delete_service,5)
-                                break
-                        except rospy.ROSException, e:
-                                found_services_first_try = False
-                                rospy.logerr("Could not get message store services. Maybe the message "
-                                             "store has not been started? Retrying..")
-                if not found_services_first_try:
-                        rospy.loginfo("Message store services found.")
+		# try and get the mongo service, block until available
+		found_services_first_try = True # if found straight away
+		while not rospy.is_shutdown():
+			try:
+				rospy.wait_for_service(insert_service,5)
+				rospy.wait_for_service(update_service,5)
+				rospy.wait_for_service(query_service,5)
+				rospy.wait_for_service(delete_service,5)
+				break
+			except rospy.ROSException, e:
+				found_services_first_try = False
+				rospy.logerr("Could not get message store services. Maybe the message "
+							 "store has not been started? Retrying..")
+		if not found_services_first_try:
+			rospy.loginfo("Message store services found.")
 		self.insert_srv = rospy.ServiceProxy(insert_service, dc_srv.MongoInsertMsg)
 		self.update_srv = rospy.ServiceProxy(update_service, dc_srv.MongoUpdateMsg)
 		self.query_srv = rospy.ServiceProxy(query_service, dc_srv.MongoQueryMsg)
@@ -246,16 +246,16 @@ class MessageStoreProxy:
 		projection_tuple =(StringPair(dc_srv.MongoQueryMsgRequest.JSON_QUERY, json.dumps(projection_query, default=json_util.default)),)
 
 		if len(sort_query) > 0:
-				sort_tuple = [StringPair(str(k), str(v)) for k, v in sort_query]
+			sort_tuple = [StringPair(str(k), str(v)) for k, v in sort_query]
 		else:
-				sort_tuple = []
+			sort_tuple = []
 
 		response = self.query_srv(
-                            self.database, self.collection, type, single, limit,
-                            StringPairList(message_tuple),
-                            StringPairList(meta_tuple),
-                            StringPairList(sort_tuple),
-                            StringPairList(projection_tuple))
+			self.database, self.collection, type, single, limit,
+			StringPairList(message_tuple),
+			StringPairList(meta_tuple),
+			StringPairList(sort_tuple),
+			StringPairList(projection_tuple))
 
 		if response.messages is None:
 			messages = []

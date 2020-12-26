@@ -43,104 +43,105 @@ static pthread_mutex_t out_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t drop_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t qsize_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void msg_callback(const sensor_msgs::CompressedImage::ConstPtr& msg)
-{
-  BSONObjBuilder document;
+void msg_callback(const sensor_msgs::CompressedImage::ConstPtr &msg) {
+    BSONObjBuilder document;
 
-  Date_t stamp = msg->header.stamp.sec * 1000.0 + msg->header.stamp.nsec / 1000000.0;
-  document.append("header", BSON(   "seq" << msg->header.seq
-				 << "stamp" << stamp
-				 << "frame_id" << msg->header.frame_id));
-  document.append("format", msg->format);
-  document.appendBinData("data", msg->data.size(), BinDataGeneral,
-			 const_cast<unsigned char*>(&msg->data[0]));
-  
-  mongodb_store::add_meta_for_msg<sensor_msgs::CompressedImage>(msg, document);
-  mongodb_conn->insert(collection, document.obj());
+    Date_t stamp = msg->header.stamp.sec * 1000.0 + msg->header.stamp.nsec / 1000000.0;
+    document.append("header", BSON("seq" << msg->header.seq
+                                         << "stamp" << stamp
+                                         << "frame_id" << msg->header.frame_id));
+    document.append("format", msg->format);
+    document.appendBinData("data", msg->data.size(), BinDataGeneral,
+                           const_cast<unsigned char *>(&msg->data[0]));
 
-  // If we'd get access to the message queue this could be more useful
-  // https://code.ros.org/trac/ros/ticket/744
-  pthread_mutex_lock(&in_counter_mutex);
-  ++in_counter;
-  pthread_mutex_unlock(&in_counter_mutex);
-  pthread_mutex_lock(&out_counter_mutex);
-  ++out_counter;
-  pthread_mutex_unlock(&out_counter_mutex);
+    mongodb_store::add_meta_for_msg<sensor_msgs::CompressedImage>(msg, document);
+    mongodb_conn->insert(collection, document.obj());
+
+    // If we'd get access to the message queue this could be more useful
+    // https://code.ros.org/trac/ros/ticket/744
+    pthread_mutex_lock(&in_counter_mutex);
+    ++in_counter;
+    pthread_mutex_unlock(&in_counter_mutex);
+    pthread_mutex_lock(&out_counter_mutex);
+    ++out_counter;
+    pthread_mutex_unlock(&out_counter_mutex);
 }
 
-void print_count(const ros::TimerEvent &te)
-{
-  unsigned int l_in_counter, l_out_counter, l_drop_counter, l_qsize;
+void print_count(const ros::TimerEvent &te) {
+    unsigned int l_in_counter, l_out_counter, l_drop_counter, l_qsize;
 
-  pthread_mutex_lock(&in_counter_mutex);
-  l_in_counter = in_counter; in_counter = 0;
-  pthread_mutex_unlock(&in_counter_mutex);
+    pthread_mutex_lock(&in_counter_mutex);
+    l_in_counter = in_counter;
+    in_counter = 0;
+    pthread_mutex_unlock(&in_counter_mutex);
 
-  pthread_mutex_lock(&out_counter_mutex);
-  l_out_counter = out_counter; out_counter = 0;
-  pthread_mutex_unlock(&out_counter_mutex);
+    pthread_mutex_lock(&out_counter_mutex);
+    l_out_counter = out_counter;
+    out_counter = 0;
+    pthread_mutex_unlock(&out_counter_mutex);
 
-  pthread_mutex_lock(&drop_counter_mutex);
-  l_drop_counter = drop_counter; drop_counter = 0;
-  pthread_mutex_unlock(&drop_counter_mutex);
+    pthread_mutex_lock(&drop_counter_mutex);
+    l_drop_counter = drop_counter;
+    drop_counter = 0;
+    pthread_mutex_unlock(&drop_counter_mutex);
 
-  pthread_mutex_lock(&qsize_mutex);
-  l_qsize = qsize; qsize = 0;
-  pthread_mutex_unlock(&qsize_mutex);
+    pthread_mutex_lock(&qsize_mutex);
+    l_qsize = qsize;
+    qsize = 0;
+    pthread_mutex_unlock(&qsize_mutex);
 
-  printf("%u:%u:%u:%u\n", l_in_counter, l_out_counter, l_drop_counter, l_qsize);
-  fflush(stdout);
+    printf("%u:%u:%u:%u\n", l_in_counter, l_out_counter, l_drop_counter, l_qsize);
+    fflush(stdout);
 }
 
 
 int
-main(int argc, char **argv)
-{
-  std::string topic = "", mongodb = "localhost", nodename = "";
-  collection = "";
+main(int argc, char **argv) {
+    std::string topic = "", mongodb = "localhost", nodename = "";
+    collection = "";
 
-  in_counter = out_counter = drop_counter = qsize = 0;
+    in_counter = out_counter = drop_counter = qsize = 0;
 
-  int c;
-  while ((c = getopt(argc, argv, "t:m:n:c:")) != -1) {
-    if ((c == '?') || (c == ':')) {
-      printf("Usage: %s -t topic -m mongodb -n nodename -c collection\n", argv[0]);
-      exit(-1);
-    } else if (c == 't') {
-      topic = optarg;
-    } else if (c == 'm') {
-      mongodb = optarg;
-    } else if (c == 'n') {
-      nodename = optarg;
-    } else if (c == 'c') {
-      collection = optarg;
+    int c;
+    while ((c = getopt(argc, argv, "t:m:n:c:")) != -1) {
+        if ((c == '?') || (c == ':')) {
+            printf("Usage: %s -t topic -m mongodb -n nodename -c collection\n", argv[0]);
+            exit(-1);
+        } else if (c == 't') {
+            topic = optarg;
+        } else if (c == 'm') {
+            mongodb = optarg;
+        } else if (c == 'n') {
+            nodename = optarg;
+        } else if (c == 'c') {
+            collection = optarg;
+        }
     }
-  }
 
-  if (topic == "") {
-    printf("No topic given.\n");
-    exit(-2);
-  } else if (nodename == "") {
-    printf("No node name given.\n");
-    exit(-2);
-  }
+    if (topic == "") {
+        printf("No topic given.\n");
+        exit(-2);
+    } else if (nodename == "") {
+        printf("No node name given.\n");
+        exit(-2);
+    }
 
-  ros::init(argc, argv, nodename);
-  ros::NodeHandle n;
+    ros::init(argc, argv, nodename);
+    ros::NodeHandle n;
 
-  std::string errmsg;
-  mongodb_conn = new DBClientConnection(/* auto reconnect*/ true);
-  if (! mongodb_conn->connect(mongodb, errmsg)) {
-    ROS_ERROR("Failed to connect to MongoDB: %s", errmsg.c_str());
-    return -1;
-  }
+    std::string errmsg;
+    mongodb_conn = new DBClientConnection(/* auto reconnect*/ true);
+    if (!mongodb_conn->connect(mongodb, errmsg)) {
+        ROS_ERROR("Failed to connect to MongoDB: %s", errmsg.c_str());
+        return -1;
+    }
 
-  ros::Subscriber sub = n.subscribe<sensor_msgs::CompressedImage>(topic, 1000, msg_callback);
-  ros::Timer count_print_timer = n.createTimer(ros::Duration(5, 0), print_count);
+    ros::Subscriber sub = n.subscribe<sensor_msgs::CompressedImage>(topic, 1000, msg_callback);
+    ros::Timer count_print_timer = n.createTimer(ros::Duration(5, 0), print_count);
 
-  ros::spin();
+    ros::spin();
 
-  delete mongodb_conn;
+    delete mongodb_conn;
 
-  return 0;
+    return 0;
 }

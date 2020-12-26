@@ -26,9 +26,9 @@ class MessageStore(object):
     def __init__(self, replicate_on_write=False):
 
         use_daemon = rospy.get_param('mongodb_use_daemon', False)
-	# If you want to use a remote datacenter, then it should be set as false
-	use_localdatacenter = rospy.get_param('~mongodb_use_localdatacenter', True)
-	local_timeout = rospy.get_param('~local_timeout', 10)
+        # If you want to use a remote datacenter, then it should be set as false
+        use_localdatacenter = rospy.get_param('~mongodb_use_localdatacenter', True)
+        local_timeout = rospy.get_param('~local_timeout', 10)
         if str(local_timeout).lower() == "none":
             local_timeout = None
 
@@ -95,8 +95,6 @@ class MessageStore(object):
         """
         Receives a
         """
-
-
         # deserialize data into object
         obj = dc_util.deserialise_message(req.message)
         # convert input tuple to dict
@@ -104,27 +102,27 @@ class MessageStore(object):
         # get requested collection from the db, creating if necessary
         collection = self._mongo_client[req.database][req.collection]
 
-	#check if the object has the location attribute
-	if hasattr(obj, 'pose'):
-	   # if it does create a location index
-    	   collection.create_index([("loc", pymongo.GEO2D)])
         #check if the object has the location attribute
-	if hasattr(obj, 'geotype'):
-	   # if it does create a location index
-    	   collection.create_index([("geoloc", pymongo.GEOSPHERE)])
+        if hasattr(obj, 'pose'):
+            # if it does create a location index
+            collection.create_index([("loc", pymongo.GEO2D)])
+            #check if the object has the location attribute
+            if hasattr(obj, 'geotype'):
+            # if it does create a location index
+            collection.create_index([("geoloc", pymongo.GEOSPHERE)])
 
-	#check if the object has the timestamp attribute TODO ?? really necessary
-	#if hasattr(obj, 'logtimestamp'):
-	   # if it does create a location index
-    	 #  collection.create_index([("datetime", pymongo.GEO2D)])
+        #check if the object has the timestamp attribute TODO ?? really necessary
+        #if hasattr(obj, 'logtimestamp'):
+        # if it does create a location index
+        #  collection.create_index([("datetime", pymongo.GEO2D)])
 
 
         # try:
         stamp = rospy.get_rostime()
         meta['inserted_at'] = datetime.utcfromtimestamp(stamp.to_sec())
         meta['inserted_by'] = req._connection_header['callerid']
-        if hasattr(obj, "header") and hasattr(obj.header, "stamp") and\
-           isinstance(obj.header.stamp, genpy.Time):
+        if hasattr(obj, "header") and hasattr(obj.header, "stamp") and \
+                isinstance(obj.header.stamp, genpy.Time):
             stamp = obj.header.stamp
         elif isinstance(obj, TFMessage):
             if obj.transforms:
@@ -146,7 +144,7 @@ class MessageStore(object):
 
         return str(obj_id)
         # except Exception, e:
-            # print e
+        # print e
 
     insert_ros_srv.type=dc_srv.MongoInsertMsg
 
