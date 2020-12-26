@@ -1,3 +1,51 @@
 /CMakeLists.txt
 /.idea/
 /venv/
+
+# START: Lines are taken from mongodb_store .gitignore file
+/mongodb_store/libmongocxx_ros/include/*
+
+/mongodb_store/*.py[cod]
+
+# C extensions
+/mongodb_store/*.so
+
+# Packages
+/mongodb_store/*.egg
+/mongodb_store/*.egg-info
+/mongodb_store/dist
+/mongodb_store/build
+/mongodb_store/eggs
+/mongodb_store/parts
+/mongodb_store/bin
+/mongodb_store/var
+/mongodb_store/sdist
+/mongodb_store/develop-eggs
+/mongodb_store/.installed.cfg
+/mongodb_store/lib
+/mongodb_store/lib64
+
+# Installer logs
+/mongodb_store/pip-log.txt
+
+# Unit test / coverage reports
+/mongodb_store/.coverage
+/mongodb_store/.tox
+/mongodb_store/nosetests.xml
+
+# Translations
+/mongodb_store/*.mo
+
+# Mr Developer
+/mongodb_store/.mr.developer.cfg
+/mongodb_store/.project
+/mongodb_store/.pydevproject
+
+/mongodb_store/*~
+
+/mongodb_store/*.pyc
+/mongodb_store/*.rrd
+/mongodb_store/*.png
+/mongodb_store/build*
+/mongodb_store/ROS_NOBUILD
+# END: Lines are taken from mongodb_store .gitignore file
