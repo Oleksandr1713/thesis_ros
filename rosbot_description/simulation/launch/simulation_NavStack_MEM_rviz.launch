@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- NavStack + Map Enrichment Module (MEM) + rviz -->
+
+    <!-- It changes a whole package Logger level  -->
+    <!--<env name="ROSCONSOLE_CONFIG_FILE" value="$(find simulation)/config/custom_rosconsole.conf"/>-->
+
+    <!-- Map server -->
+    <arg name="map_file" default="$(find simulation)/maps/reference_map.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <!-- Map enrichment -->
+    <node name="map_enrichment" pkg="simulation" type="map_enrichment_node" output="screen"/>
+
+    <!-- AMCL -->
+    <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
+        <arg name="min_particles" value="200" />
+        <arg name="max_particles" value="500" />
+    </include>
+
+    <!-- Move_base -->
+    <arg name="move_forward_and_backward" default="false"/>
+    <node name="move_base" pkg="move_base" type="move_base" respawn="false" output="screen">
+        <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+        <rosparam file="$(find simulation)/move_base_param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find simulation)/move_base_param/costmap_common_params_waffle.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find simulation)/move_base_param/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find simulation)/move_base_param/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find simulation)/move_base_param/move_base_params.yaml" command="load" />
+        <rosparam file="$(find simulation)/move_base_param/dwa_local_planner_params_waffle.yaml" command="load" />
+        <remap from="cmd_vel" to="/cmd_vel"/>
+        <remap from="odom" to="odom"/>
+        <remap from="scan" to="/scan"/>
+        <remap from="map" to="/simulation/augmented_map"/>
+        <param name="DWAPlannerROS/min_vel_x" value="-0.15" unless="$(arg move_forward_and_backward)" />
+    </node>
+
+    <!-- Show in Rviz -->
+    <!--                                     args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"-->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find simulation)/rviz/sim_navigation.rviz" required="true" output='log'/>
+
+</launch>

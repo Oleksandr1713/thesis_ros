@@ -1,9 +1,9 @@
 <launch>
 
-    <arg name="model" default="$(find rosbot_description)/urdf/rosbot.xacro"/>
-    <arg name="rvizconfig" default="$(find simulation)/rviz/rosbot_model.rviz" />
+    <arg name="model" default="$(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
+    <arg name="rvizconfig" default="$(find simulation)/rviz/waffle_model.rviz" />
 
-    <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+    <param name="turtlebot3_description" command="$(find xacro)/xacro $(arg model)" />
 
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
