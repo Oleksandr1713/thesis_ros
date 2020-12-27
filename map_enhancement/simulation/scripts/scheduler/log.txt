@@ -1,0 +1,16 @@
+// if this file must be renamed, the absolute path to this file in "simulation/include/my_lib/auxiliary_func.h" must also be amended
+
+warning: commands will be executed using /bin/sh
+job 227 at Mon Sep 28 03:58:00 2020
+warning: commands will be executed using /bin/sh
+job 235 at Wed Sep 30 14:35:00 2020
+
+warning: commands will be executed using /bin/sh
+job 236 at Wed Sep 30 14:38:00 2020
+
+warning: commands will be executed using /bin/sh
+job 256 at Sun Dec 27 22:11:00 2020
+
+warning: commands will be executed using /bin/sh
+job 257 at Sun Dec 27 22:17:00 2020
+
