@@ -50,3 +50,131 @@
 /mongodb_store/build*
 /mongodb_store/ROS_NOBUILD
 # END: Lines are taken from mongodb_store .gitignore file
+
+
+# START: Lines are taken from turtlebot3 .gitignore file
+# Compiled Object files
+/turtlebot3/*.slo
+/turtlebot3/*.lo
+/turtlebot3/*.o
+/turtlebot3/*.obj
+
+# Precompiled Headers
+/turtlebot3/*.gch
+/turtlebot3/*.pch
+
+# Compiled Dynamic libraries
+/turtlebot3/*.so
+/turtlebot3/*.dylib
+/turtlebot3/*.dll
+
+# Fortran module files
+/turtlebot3/*.mod
+
+# Compiled Static libraries
+/turtlebot3/*.lai
+/turtlebot3/*.la
+/turtlebot3/*.a
+/turtlebot3/*.lib
+
+# Executables
+/turtlebot3/*.exe
+/turtlebot3/*.out
+/turtlebot3/*.app
+
+# user setting
+/turtlebot3/*.*~
+/turtlebot3/*.bak
+/turtlebot3/.svn
+/turtlebot3/.tags
+/turtlebot3/.tags_sorted_by_file
+/turtlebot3/*.cfgc
+/turtlebot3/*.txt.user*
+/turtlebot3/*-build/
+/turtlebot3/cpp/
+/turtlebot3/bin/
+/turtlebot3/build/
+/turtlebot3/msg_gen/
+/turtlebot3/srv_gen/
+/turtlebot3/docs/
+/turtlebot3/lib/
+/turtlebot3/cmake_install.cmake
+/turtlebot3/Makefile
+/turtlebot3/CMakeFiles/
+/turtlebot3/assets/
+/turtlebot3/gen/
+/turtlebot3/build.xml
+/turtlebot3/lint.xml
+/turtlebot3/local.properties
+/turtlebot3/proguard-project.txt
+/turtlebot3/build-*/
+/turtlebot3/*.autosave
+/turtlebot3/*.pyc
+/turtlebot3/*.dat
+/turtlebot3/*.txt.user
+/turtlebot3/*.gch
+# END: Lines are taken from turtlebot3 .gitignore file
+
+
+# START: Lines are taken from turtlebot3_msgs .gitignore file
+# Compiled Object files
+/turtlebot3_msgs/*.slo
+/turtlebot3_msgs/*.lo
+/turtlebot3_msgs/*.o
+/turtlebot3_msgs/*.obj
+
+# Precompiled Headers
+/turtlebot3_msgs/*.gch
+/turtlebot3_msgs/*.pch
+
+# Compiled Dynamic libraries
+/turtlebot3_msgs/*.so
+/turtlebot3_msgs/*.dylib
+/turtlebot3_msgs/*.dll
+
+# Fortran module files
+/turtlebot3_msgs/*.mod
+
+# Compiled Static libraries
+/turtlebot3_msgs/*.lai
+/turtlebot3_msgs/*.la
+/turtlebot3_msgs/*.a
+/turtlebot3_msgs/*.lib
+
+# Executables
+/turtlebot3_msgs/*.exe
+/turtlebot3_msgs/*.out
+/turtlebot3_msgs/*.app
+
+# user setting
+/turtlebot3_msgs/*.*~
+/turtlebot3_msgs/*.bak
+/turtlebot3_msgs/.svn
+/turtlebot3_msgs/.tags
+/turtlebot3_msgs/.tags_sorted_by_file
+/turtlebot3_msgs/*.cfgc
+/turtlebot3_msgs/*.txt.user*
+/turtlebot3_msgs/*-build/
+/turtlebot3_msgs/cpp/
+/turtlebot3_msgs/bin/
+/turtlebot3_msgs/build/
+/turtlebot3_msgs/msg_gen/
+/turtlebot3_msgs/srv_gen/
+/turtlebot3_msgs/docs/
+/turtlebot3_msgs/lib/
+/turtlebot3_msgs/cmake_install.cmake
+/turtlebot3_msgs/Makefile
+/turtlebot3_msgs/CMakeFiles/
+/turtlebot3_msgs/assets/
+/turtlebot3_msgs/gen/
+/turtlebot3_msgs/build.xml
+/turtlebot3_msgs/lint.xml
+/turtlebot3_msgs/local.properties
+/turtlebot3_msgs/proguard-project.txt
+/turtlebot3_msgs/build-*/
+/turtlebot3_msgs/*.autosave
+/turtlebot3_msgs/*.pyc
+/turtlebot3_msgs/*.dat
+/turtlebot3_msgs/*.txt.user
+/turtlebot3_msgs/*.gch
+# END: Lines are taken from turtlebot3_msgs .gitignore file
