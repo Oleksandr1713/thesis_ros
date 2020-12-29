@@ -46,7 +46,7 @@ class ObstacleDetectionAndPositionCalculation{
 private:
     std::string targetFrameId_;
     std::string objFramePrefix_;
-    ros::Subscriber subs_;
+    ros::Subscriber subImageRec;
     ros::Publisher pubPauseAgv;
     ros::Publisher pubResumeAgv;
     ros::Publisher pubReplanAgv;
@@ -64,7 +64,7 @@ public:
         nhPrivate.param("object_prefix", objFramePrefix_, objFramePrefix_);
 
         ros::NodeHandle nh_base;
-        subs_ = nh_base.subscribe("objectsStamped", 1, &ObstacleDetectionAndPositionCalculation::objectsDetectedCallback, this);
+        subImageRec = nh_base.subscribe("objectsStamped", 1, &ObstacleDetectionAndPositionCalculation::objectsDetectedCallback, this);
 
         pubPauseAgv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_PAUSE_GOAL), 1, false);
         pubResumeAgv = nh_base.advertise<std_msgs::Empty>(str(node_constants::TOPIC_RESUME_GOAL), 1, false);

@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "mongodb_store/message_store.h"
 
-#include "database/db_proxy_decorator.h"
+#include "database/database_decorator.h"
 #include "simulation/DatabaseEntryInsert.h"
 #include "my_lib/auxiliary_func.h"
 #include "constants/node_constants.h"
@@ -9,7 +9,7 @@
 
 using namespace mongodb_store;
 using namespace std;
-using namespace mongodb_proxy_decorator;
+using namespace database_decorator;
 //using namespace simulation;
 using namespace auxiliary_func;
 

@@ -26,7 +26,7 @@
     <!-- Job scheduler -->
     <node name="job_scheduler" pkg="simulation" type="job_scheduler_node" output="screen"/>
 
-    <!-- Job catcher -->
-    <node name="job_catcher" pkg="simulation" type="job_catcher_node" output="screen"/>
+    <!-- Job receiver -->
+    <node name="job_receiver" pkg="simulation" type="job_receiver_node" output="screen"/>
 
 </launch>

@@ -9,9 +9,9 @@ using namespace simulation;
 using namespace auxiliary_func;
 
 /* ROS node name*/
-constexpr static const char* NODE_NAME = "job_catcher_node";
+constexpr static const char* NODE_NAME = "job_receiver_node";
 
-class JobCatcher{
+class JobReceiver{
 
 private:
     ros::Subscriber subJobCatcher;
@@ -19,20 +19,20 @@ private:
     ros::ServiceClient clientEmptyCache;
 
 public:
-    JobCatcher() {
+    JobReceiver() {
         ros::NodeHandle nhBase;
-        subJobCatcher = nhBase.subscribe(str(node_constants::TOPIC_JOB_CATCHER), 1, &JobCatcher::jobCatcherCallback, this);
+        subJobCatcher = nhBase.subscribe(str(node_constants::TOPIC_JOB_RECEIVER), 1, &JobReceiver::jobReceiverCallback, this);
         clientRemoveObject = nhBase.serviceClient<simulation::RemoveObjectFromMapMsg>(str(node_constants::ADV_IMPOVERISH_AUGMENTED_MAP));
         clientEmptyCache = nhBase.serviceClient<simulation::CleanCacheMsg>(str(node_constants::ADV_CLEAN_CACHE));
-        ROS_INFO("Job catcher node is up.");
+        ROS_INFO("Job receiver node is up.");
     }
 
-    ~JobCatcher(){
-        ROS_INFO("Job catcher node is destroyed.");
+    ~JobReceiver(){
+        ROS_INFO("Job receiver node is destroyed.");
     }
 
 private:
-    void jobCatcherCallback(const simulation::JobBriefInfo& msg){
+    void jobReceiverCallback(const simulation::JobBriefInfo& msg){
         RemoveObjectFromMapMsg rofm_msg;
         rofm_msg.request.entry_id = msg.entry_id;
         // let's try to request a sign removal from the static map and, in consequence, from MongoDB
@@ -68,7 +68,7 @@ private:
 
 int main(int argc, char * argv[]) {
     ros::init(argc, argv, str(NODE_NAME));
-    JobCatcher jobCatcher;
+    JobReceiver jobReceiver;
     ros::spin();
     return 0;
 }

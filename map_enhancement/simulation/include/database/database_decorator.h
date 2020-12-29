@@ -9,7 +9,7 @@ using namespace mongodb_store;
 using namespace std;
 using namespace simulation;
 
-namespace mongodb_proxy_decorator {
+namespace database_decorator {
 
     string insertNewEntry(MessageStoreProxy& db_proxy, DatabaseEntryInsert& entry){
         /* Populate database with a new entry and return its ID*/

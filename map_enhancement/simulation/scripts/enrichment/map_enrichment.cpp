@@ -11,11 +11,11 @@
 
 #include "simulation/DatabaseEntryInsert.h"
 #include "mongodb_store/message_store.h"
-#include "database/db_proxy_decorator.h"
+#include "database/database_decorator.h"
 
 using namespace auxiliary_func;
 using namespace simulation;
-using namespace mongodb_proxy_decorator;
+using namespace database_decorator;
 
 /* ROS node name*/
 constexpr static const char* NODE_NAME = "map_enrichment_node";

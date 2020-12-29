@@ -51,7 +51,7 @@ namespace node_constants {
 /**** JOB SCHEDULER NODE ****/
 
     /* Topic names */
-    constexpr static const char *TOPIC_JOB_CATCHER = "/simulation/catcher"; // this topic name must be also set in JOB SCHEDULER, where AT-unix utility is used
+    constexpr static const char *TOPIC_JOB_RECEIVER = "/simulation/receiver"; // this topic name must be also set in JOB SCHEDULER, where AT-unix utility is used
 
 
 /**** OBSTACLE DETECTION AND POSITION CALCULATION NODE ****/

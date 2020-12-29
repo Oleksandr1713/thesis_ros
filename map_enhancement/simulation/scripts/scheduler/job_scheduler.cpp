@@ -4,7 +4,7 @@
 
 #include "ros/ros.h"
 #include "mongodb_store/message_store.h"
-#include "database/db_proxy_decorator.h"
+#include "database/database_decorator.h"
 #include "constants/node_constants.h"
 #include "constants/obstacle_constants.h"
 #include "my_lib/auxiliary_func.h"
@@ -13,7 +13,7 @@
 
 using namespace std;
 using namespace mongodb_store;
-using namespace mongodb_proxy_decorator;
+using namespace database_decorator;
 using namespace auxiliary_func;
 using namespace simulation;
 
@@ -101,7 +101,7 @@ private:
          * the message to the ros topic. */
         long job_id = 0;
         ROS_DEBUG("JC_SJ_1");
-        string cmd = R"(echo "rostopic pub -1 /simulation/catcher simulation/JobBriefInfo -- \"')";
+        string cmd = R"(echo "rostopic pub -1 /simulation/receiver simulation/JobBriefInfo -- \"')";
         cmd.append(msg.entry_id);
         cmd.append(R"('\"")");
         cmd.append(" | ");
@@ -169,10 +169,10 @@ string getDateTimeForAT_Test(long int& seconds){
 /* Method below is needed only for debugging */
 long int scheduleJob_Test(long int scheduledTime){
     long int job_id = 0;
-    string cmd = R"(echo "rostopic pub -1 /catcher simulation/JobBriefInfo -- \"')";
+    string cmd = R"(echo "rostopic pub -1 /receiver simulation/JobBriefInfo -- \"')";
     cmd.append(to_string(111+2));
     cmd.append(R"('\"")");
-//    string cmd = "echo 'rostopic pub -1 /catcher simulation/JobBriefInfo -- \"\'77\'\"'";
+//    string cmd = "echo 'rostopic pub -1 /receiver simulation/JobBriefInfo -- \"\'77\'\"'";
 
 //    string cmd = R"(echo "spd-say 'bip bip bip'")";
     cmd.append(" | ");
