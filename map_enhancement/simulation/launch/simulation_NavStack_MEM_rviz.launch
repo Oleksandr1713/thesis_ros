@@ -32,7 +32,7 @@
         <remap from="odom" to="odom"/>
         <remap from="scan" to="/scan"/>
         <remap from="map" to="/simulation/augmented_map"/>
-        <param name="DWAPlannerROS/min_vel_x" value="-0.15" unless="$(arg move_forward_and_backward)" />
+        <param name="DWAPlannerROS/min_vel_x" value="-0.26" unless="$(arg move_forward_and_backward)" />
     </node>
 
     <!-- Show in Rviz -->

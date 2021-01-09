@@ -1140,10 +1140,10 @@
       <static>1</static>
     </model>
     <state world_name='default'>
-      <sim_time>32 574000000</sim_time>
-      <real_time>32 743982541</real_time>
-      <wall_time>1608914182 528482381</wall_time>
-      <iterations>32574</iterations>
+      <sim_time>42 801000000</sim_time>
+      <real_time>10 272596059</real_time>
+      <wall_time>1610045460 375641425</wall_time>
+      <iterations>10227</iterations>
       <model name='Destination_Plane'>
         <pose frame=''>-5.50194 3.47324 0 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -1165,10 +1165,10 @@
         </link>
       </model>
       <model name='Stop_Sign_Small'>
-        <pose frame=''>-1.31397 -1.2249 -0.319 0 -0 0</pose>
+        <pose frame=''>-0.702763 -3.79471 -0.319 0 -0 1.576</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-1.31397 -1.2249 -0.319 0 -0 0</pose>
+          <pose frame=''>-0.702763 -3.79471 -0.319 0 -0 1.576</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1195,23 +1195,23 @@
         </link>
       </model>
       <model name='cardboard_box'>
-        <pose frame=''>-1.39074 0.694192 0.149281 -0 0.001131 0.122745</pose>
+        <pose frame=''>-1.39075 0.694193 0.149274 0 0.001101 0.122742</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-1.39074 0.694192 0.149281 -0 0.001131 0.122745</pose>
+          <pose frame=''>-1.39075 0.694193 0.149274 0 0.001101 0.122742</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.005634 -0.007565 0.000655 0.051953 0.039055 3.4e-05</acceleration>
-          <wrench>0.011268 -0.015129 0.00131 0 -0 0</wrench>
+          <acceleration>0.006215 -0.00727 -0.000968 0.049575 0.042375 -0.001027</acceleration>
+          <wrench>0.01243 -0.01454 -0.001935 0 -0 0</wrench>
         </link>
       </model>
       <model name='cardboard_box_0'>
-        <pose frame=''>-2.01384 0.699977 0.148999 1e-06 -2e-06 -0.102365</pose>
+        <pose frame=''>-2.01384 0.699977 0.148999 1e-06 -2e-06 -0.102362</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-2.01384 0.699977 0.148999 1e-06 -2e-06 -0.102365</pose>
+          <pose frame=''>-2.01384 0.699977 0.148999 1e-06 -2e-06 -0.102362</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.004742 0.000778 -0.000261 -0.003848 -0.032569 -0.00122</acceleration>
-          <wrench>-0.009484 0.001556 -0.000521 0 -0 0</wrench>
+          <acceleration>-0.002588 0.000993 -0.000388 -0.005801 -0.017634 -0.000955</acceleration>
+          <wrench>-0.005176 0.001986 -0.000776 0 -0 0</wrench>
         </link>
       </model>
       <model name='cardboard_box_2'>
@@ -1230,38 +1230,38 @@
         <link name='link'>
           <pose frame=''>-1.6022 0.237496 0.149 0 0 -0.14086</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000497 0.015245 -0.016472 -0.099803 0.005225 0.000649</acceleration>
-          <wrench>0.000995 0.030489 -0.032944 0 -0 0</wrench>
+          <acceleration>0.001768 0.017546 -0.021221 -0.115335 0.014542 0.000351</acceleration>
+          <wrench>0.003535 0.035092 -0.042442 0 -0 0</wrench>
         </link>
       </model>
       <model name='cardboard_box_4'>
-        <pose frame=''>-1.03566 0.274749 0.148999 -1e-06 -1e-06 0.004199</pose>
+        <pose frame=''>-1.03566 0.274749 0.148999 -1e-06 -1e-06 0.004203</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-1.03566 0.274749 0.148999 -1e-06 -1e-06 0.004199</pose>
+          <pose frame=''>-1.03566 0.274749 0.148999 -1e-06 -1e-06 0.004203</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.005287 -0.007805 0.011338 0.054318 0.034665 -0.005182</acceleration>
-          <wrench>0.010574 -0.015611 0.022676 0 -0 0</wrench>
+          <acceleration>0.003429 -0.008391 0.012678 0.061252 0.021031 -0.007948</acceleration>
+          <wrench>0.006858 -0.016781 0.025356 0 -0 0</wrench>
         </link>
       </model>
       <model name='cardboard_box_5'>
-        <pose frame=''>-1.91858 0.706256 0.447998 0 0 -0.039786</pose>
+        <pose frame=''>-1.91858 0.706257 0.447998 0 0 -0.039774</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-1.91858 0.706256 0.447998 0 0 -0.039786</pose>
+          <pose frame=''>-1.91858 0.706257 0.447998 0 0 -0.039774</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.009293 -0.000883 0.000849 -0.009485 -0.072059 -0.047057</acceleration>
-          <wrench>0.018586 -0.001765 0.001698 0 -0 0</wrench>
+          <acceleration>0.010936 -0.000576 0.001449 -0.006242 -0.064059 -0.04178</acceleration>
+          <wrench>0.021873 -0.001153 0.002898 0 -0 0</wrench>
         </link>
       </model>
       <model name='cardboard_box_6'>
-        <pose frame=''>-1.26742 0.56972 0.448213 -0.000113 0.000908 0.023696</pose>
+        <pose frame=''>-1.26744 0.56972 0.448208 -0.00011 0.000884 0.023695</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose frame=''>-1.26742 0.56972 0.448213 -0.000113 0.000908 0.023696</pose>
+          <pose frame=''>-1.26744 0.56972 0.448208 -0.00011 0.000884 0.023695</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.009345 -0.003324 0.016115 -0.073779 -0.129731 -0.000396</acceleration>
-          <wrench>-0.018689 -0.006647 0.03223 0 -0 0</wrench>
+          <acceleration>-0.009788 -0.001971 0.016837 -0.083033 -0.135795 -0.004098</acceleration>
+          <wrench>-0.019577 -0.003942 0.033674 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_plane'>
@@ -1428,7 +1428,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-0.708145 -1.54103 18.0063 -1e-06 1.5138 1.54732</pose>
+        <pose frame=''>-0.853031 -0.548598 18.4748 -4.6e-05 1.5698 1.57132</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
